@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard KAM — Apprecio</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ap-blue:#FF2D55;
+  --ap-teal:#9B8FD4;
+  --ap-teal-light:#F0EEF9;
+  --ap-blue-light:#FFF0F3;
+  --ap-amber:#F4A325;
+  --ap-red:#D9534F;
+  --ap-gray:#6B7280;
+  --ap-border:#E5E7EB;
+  --ap-bg:#F7F8FA;
+  --ap-card:#FFFFFF;
+  --ap-text:#111827;
+  --ap-text-sec:#6B7280;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--ap-bg);color:var(--ap-text);font-size:14px;line-height:1.5}
+header{background:#FF2D55;padding:16px 28px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:32px;height:32px;background:#9B8FD4;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.logo-mark svg{width:20px;height:20px;fill:#fff}
+.logo-text{color:#fff;font-size:18px;font-weight:600;letter-spacing:-0.3px}
+.logo-sub{color:rgba(255,255,255,0.6);font-size:11px;margin-top:1px}
+.header-right{color:rgba(255,255,255,0.7);font-size:12px;text-align:right}
+.main{padding:24px 28px;max-width:1400px;margin:0 auto}
+.filters{background:var(--ap-card);border:1px solid var(--ap-border);border-radius:12px;padding:16px 20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:24px}
+.filter-label{font-size:12px;color:var(--ap-text-sec);font-weight:500;text-transform:uppercase;letter-spacing:0.5px;margin-right:4px}
+select{border:1px solid var(--ap-border);border-radius:8px;padding:7px 12px;font-size:13px;color:var(--ap-text);background:#fff;cursor:pointer;outline:none;transition:border-color .15s}
+select:focus{border-color:#9B8FD4}
+.filter-group{display:flex;align-items:center;gap:6px}
+.btn-reset{background:#9B8FD4;color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:13px;cursor:pointer;font-weight:500;transition:background .15s}
+.btn-reset:hover{background:#7d70b8}
+.exec-card{background:linear-gradient(135deg,#FF2D55 0%,#c4173a 100%);border-radius:12px;padding:20px 24px;margin-bottom:24px;color:#fff}
+.exec-card h2{font-size:13px;font-weight:500;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px}
+.exec-body{font-size:14px;line-height:1.7;color:rgba(255,255,255,0.92)}
+.exec-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.tag{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:500}
+.tag-teal{background:rgba(0,168,120,0.25);color:#7FFFDA}
+.tag-amber{background:rgba(244,163,37,0.25);color:#FFD97D}
+.tag-red{background:rgba(217,83,79,0.25);color:#FFB3B0}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px}
+.kpi{background:var(--ap-card);border:1px solid var(--ap-border);border-radius:12px;padding:16px 18px}
+.kpi-label{font-size:11px;color:var(--ap-text-sec);font-weight:500;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+.kpi-value{font-size:28px;font-weight:600;color:#FF2D55;line-height:1}
+.kpi-sub{font-size:11px;color:var(--ap-text-sec);margin-top:4px}
+.kpi-accent{border-left:3px solid #FF2D55}
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.charts-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px}
+.chart-card{background:var(--ap-card);border:1px solid var(--ap-border);border-radius:12px;padding:20px}
+.chart-card.full{grid-column:1/-1}
+.chart-title{font-size:13px;font-weight:600;color:var(--ap-text);margin-bottom:4px}
+.chart-sub{font-size:11px;color:var(--ap-text-sec);margin-bottom:16px}
+.chart-wrap{position:relative}
+.insights-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.insight-card{background:var(--ap-card);border:1px solid var(--ap-border);border-radius:12px;padding:20px}
+.insight-title{font-size:13px;font-weight:600;color:var(--ap-text);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.badge{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:10px;font-weight:600}
+.badge-teal{background:var(--ap-teal-light);color:var(--ap-teal)}
+.badge-red{background:#FEF2F2;color:var(--ap-red)}
+.badge-amber{background:#FEF9EC;color:#B45309}
+.badge-blue{background:var(--ap-blue-light);color:var(--ap-blue)}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.bar-label{font-size:12px;color:var(--ap-text);min-width:130px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{flex:1;height:8px;background:var(--ap-bg);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .3s}
+.bar-count{font-size:11px;color:var(--ap-text-sec);min-width:24px;text-align:right}
+.risk-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--ap-border)}
+.risk-item:last-child{border-bottom:none}
+.risk-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.risk-dot-red{background:var(--ap-red)}
+.risk-dot-amber{background:var(--ap-amber)}
+.risk-name{font-size:12px;font-weight:500;color:var(--ap-text)}
+.risk-detail{font-size:11px;color:var(--ap-text-sec);margin-top:2px}
+.opp-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--ap-border)}
+.opp-item:last-child{border-bottom:none}
+.opp-name{font-size:12px;font-weight:500;color:var(--ap-text)}
+.opp-meta{font-size:11px;color:var(--ap-text-sec)}
+.opp-badge{background:#F0EEF9;color:#9B8FD4;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px}
+.table-section{background:var(--ap-card);border:1px solid var(--ap-border);border-radius:12px;padding:20px;margin-bottom:24px}
+.table-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px}
+.table-title{font-size:13px;font-weight:600;color:var(--ap-text)}
+.search-input{border:1px solid var(--ap-border);border-radius:8px;padding:7px 12px;font-size:12px;color:var(--ap-text);background:#fff;outline:none;transition:border-color .15s;width:200px}
+.search-input:focus{border-color:#9B8FD4}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:8px 12px;background:var(--ap-bg);color:var(--ap-text-sec);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:0.4px;position:sticky;top:0;border-bottom:1px solid var(--ap-border)}
+td{padding:10px 12px;border-bottom:1px solid var(--ap-border);vertical-align:top;color:var(--ap-text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#FAFAFA}
+.tipo-pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500}
+.pill-venta{background:#DBEAFE;color:#1D4ED8}
+.pill-seguimiento{background:#D1FAE5;color:#065F46}
+.pill-exploracion{background:#EDE9FE;color:#5B21B6}
+.pill-explorafuerza{background:#FEF3C7;color:#92400E}
+.pill-other{background:#F3F4F6;color:#374151}
+.success-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+.heatmap-grid{display:grid;grid-template-columns:auto repeat(7,1fr);gap:3px;font-size:10px;align-items:center}
+.hm-header{text-align:center;color:var(--ap-text-sec);font-weight:500;padding:4px}
+.hm-label{color:var(--ap-text-sec);padding-right:8px;white-space:nowrap}
+.hm-cell{aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:500;cursor:default}
+.pagination{display:flex;gap:6px;align-items:center;margin-top:12px;justify-content:flex-end}
+.page-btn{border:1px solid var(--ap-border);background:#fff;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--ap-text)}
+.page-btn.active{background:#9B8FD4;color:#fff;border-color:#9B8FD4}
+.page-btn:hover:not(.active){background:var(--ap-bg)}
+.page-info{font-size:11px;color:var(--ap-text-sec)}
+.empty-state{text-align:center;padding:40px;color:var(--ap-text-sec);font-size:13px}
+footer{text-align:center;padding:20px;color:var(--ap-text-sec);font-size:11px;border-top:1px solid var(--ap-border);margin-top:8px}
+@media(max-width:900px){
+  .charts-grid,.charts-grid-3,.insights-grid{grid-template-columns:1fr}
+  .chart-card.full{grid-column:1}
+  .main{padding:16px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    <div>
+      <div class="logo-text">Apprecio</div>
+      <div class="logo-sub">Dashboard Comercial KAM</div>
+    </div>
+  </div>
+  <div class="header-right" id="header-date-range">Cargando datos...</div>
+</header>
+
+<div class="main">
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <span class="filter-label">Filtros</span>
+    <div class="filter-group">
+      <span style="font-size:12px;color:var(--ap-text-sec)">Semana</span>
+      <select id="f-week"><option value="">Todas</option></select>
+    </div>
+    <div class="filter-group" style="position:relative">
+      <span style="font-size:12px;color:var(--ap-text-sec)">KAM</span>
+      <div id="kam-dropdown" style="position:relative">
+        <button id="kam-btn" onclick="toggleKamDropdown(event)" style="border:1px solid var(--ap-border);border-radius:8px;padding:7px 28px 7px 12px;font-size:13px;color:var(--ap-text);background:#fff;cursor:pointer;outline:none;min-width:160px;text-align:left;position:relative">
+          <span id="kam-btn-label">Todos</span>
+          <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--ap-text-sec)">▼</span>
+        </button>
+        <div id="kam-list" style="display:none;position:absolute;top:calc(100% + 4px);left:0;background:#fff;border:1px solid var(--ap-border);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.10);z-index:100;min-width:200px;max-height:260px;overflow-y:auto;padding:6px 0"></div>
+      </div>
+    </div>
+    <div class="filter-group">
+      <span style="font-size:12px;color:var(--ap-text-sec)">Tipo</span>
+      <select id="f-tipo"><option value="">Todos</option></select>
+    </div>
+    <button class="btn-reset" onclick="resetFilters()">Limpiar filtros</button>
+    <span id="filter-count" style="font-size:12px;color:var(--ap-text-sec);margin-left:auto"></span>
+  </div>
+
+  <!-- EXECUTIVE SUMMARY -->
+  <div class="exec-card" id="exec-summary">
+    <h2>Resumen ejecutivo</h2>
+    <div class="exec-body" id="exec-body">Calculando...</div>
+    <div class="exec-tags" id="exec-tags"></div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi kpi-accent">
+      <div class="kpi-label">Total reuniones</div>
+      <div class="kpi-value" id="kpi-total">—</div>
+      <div class="kpi-sub" id="kpi-total-sub"></div>
+    </div>
+    <div class="kpi kpi-accent">
+      <div class="kpi-label">Reuniones / día</div>
+      <div class="kpi-value" id="kpi-rpm">—</div>
+      <div class="kpi-sub">promedio días activos</div>
+    </div>
+    <div class="kpi kpi-accent">
+      <div class="kpi-label">Tasa de éxito</div>
+      <div class="kpi-value" id="kpi-exit">—</div>
+      <div class="kpi-sub">predicción alta (4-5)</div>
+    </div>
+    <div class="kpi kpi-accent">
+      <div class="kpi-label">KAMs activos</div>
+      <div class="kpi-value" id="kpi-kams">—</div>
+      <div class="kpi-sub">ejecutivos con reuniones</div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW 1 -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">Reuniones por semana</div>
+      <div class="chart-sub">Evolución semanal de actividad</div>
+      <div class="chart-wrap" style="height:220px"><canvas id="chart-semana" role="img" aria-label="Reuniones por semana">Gráfico de barras por semana.</canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Distribución por tipo</div>
+      <div class="chart-sub">Composición del pipeline</div>
+      <div id="legend-tipo" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px"></div>
+      <div class="chart-wrap" style="height:180px"><canvas id="chart-tipo" role="img" aria-label="Distribución tipos de reunión">Gráfico de torta por tipo.</canvas></div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW 2 -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">Ranking por KAM</div>
+      <div class="chart-sub">Reuniones por ejecutivo</div>
+      <div class="chart-wrap" id="chart-kam-wrap" style="height:280px"><canvas id="chart-kam" role="img" aria-label="Reuniones por KAM">Gráfico horizontal KAMs.</canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Top 10 clientes</div>
+      <div class="chart-sub">Mayor frecuencia de reuniones</div>
+      <div class="chart-wrap" id="chart-cli-wrap" style="height:280px"><canvas id="chart-cli" role="img" aria-label="Top clientes">Top 10 clientes.</canvas></div>
+    </div>
+  </div>
+
+  <!-- INSIGHTS ROW -->
+  <div class="insights-grid">
+    <div class="insight-card">
+      <div class="insight-title">
+        <span class="badge badge-teal" style="font-size:14px">📊</span>
+        Temas más tratados
+      </div>
+      <div id="topics-list"></div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-title">
+        <span class="badge badge-amber" style="font-size:14px">⭐</span>
+        Solicitudes frecuentes de clientes
+      </div>
+      <div id="requests-list"></div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-title">
+        <span class="badge badge-teal" style="font-size:14px">🚀</span>
+        Oportunidades comerciales detectadas
+      </div>
+      <div id="opps-list"></div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-title">
+        <span class="badge badge-red" style="font-size:14px">⚠️</span>
+        Riesgos y alertas
+      </div>
+      <div id="risks-list"></div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-section">
+    <div class="table-header">
+      <div class="table-title">Detalle de reuniones</div>
+      <input class="search-input" id="search-input" placeholder="Buscar cliente, KAM..." oninput="applyFilters()">
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:82px">Fecha</th>
+            <th style="width:130px">KAM</th>
+            <th style="width:130px">Cliente</th>
+            <th style="width:110px">Tipo</th>
+            <th>Resumen</th>
+            <th style="width:180px">Acuerdos / Próximos pasos</th>
+            <th style="width:60px">Éxito</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;flex-wrap:wrap;gap:8px">
+      <span class="page-info" id="page-info"></span>
+      <div class="pagination" id="pagination"></div>
+    </div>
+  </div>
+
+</div>
+<footer>Apprecio · Dashboard Comercial KAM · Datos al 26 jun 2026</footer>
+
+<script>
+const RAW = [{"id":"9bdd5438-70e6-11f1-b137-0a67e68988af","fecha":"2026-06-26","week":26,"month":6,"dow":4,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | NC | Hydrotorc","tipo":"Venta Rewards","resumen":"La conversación se desarrolla en un tono profesional, cercano y optimista, centrándose en cómo la plataforma de Apprecio puede facilitar la gestión de incentivos para la empresa NitroTork durante su próximo proceso de certificación ISO.  Necesidades ...","acuerdos":"Sí, Darling envió el correo con la información necesaria (ficha de registro y contrato) para que Sebastián lo revise con el gerente, acordando retomar el contacto a fines de julio.","prediccion_exito":5,"sentimiento":3,"dolores":"- Dolor: Carga operativa y pérdida de tiempo en la gestión de beneficios.   Contexto: El cliente menciona que el dueño de la empresa gasta mucho tiempo personal y esfuerzo físico comprando regalos para los colaboradores, lo cual le genera una carga adicional a sus labores.  - Dolor: Falta de flexibi","objeciones":"- Objeción: Dudas sobre cómo gestionar el impacto de los incentivos en la liquidación de sueldo.    Contexto: El cliente mostró preocupación al notar que los puntos entregados deben ser declarados en ","duracion":984},{"id":"1a38cd58-700b-11f1-bd47-0a67e68988af","fecha":"2026-06-25","week":26,"month":6,"dow":3,"kam":"Lorenzo Jamasmie","cliente":"Propuesta comercial Apprecio","nombre_reunion":"Propuesta comercial Apprecio","tipo":"Seguimiento clientes actuales","resumen":"La conversación se desarrolla en un tono colaborativo y propositivo, centrado en la búsqueda de eficiencias operativas y estrategias de fidelización comercial tras una reestructuración interna en el área de beneficios de la empresa cliente. Lorenzo J...","acuerdos":"","prediccion_exito":4,"sentimiento":3,"dolores":"- Dolor: Falta de competitividad comercial y valor agregado.   Contexto: La clienta siente que la propuesta actual de Apprecio es básica, ya que solo recibe lo mismo que invierte, sin obtener descuentos u otros beneficios que le ayuden a justificar la inversión ante su nueva jefatura.  - Dolor: Inef","objeciones":"- Objeción: Falta de valor agregado en la oferta actual en comparación con otros proveedores.   Contexto: La clienta mencionó que, a diferencia de otros servicios que contrata, siente que con Apprecio","duracion":1827},{"id":"63fb4cf0-6fec-11f1-aec2-0a67e68988af","fecha":"2026-06-25","week":26,"month":6,"dow":3,"kam":"Lorenzo Jamasmie","cliente":"Desafíos Impulsa julio","nombre_reunion":"Desafíos Impulsa julio","tipo":"Mantención Fuerza/Smart Loyalty","resumen":"La conversación entre el equipo de Apprecio y la contraparte de Entel se desarrolló en un tono cercano, colaborativo y con un enfoque orientado a la resolución estratégica. La sesión permitió alinear las expectativas para el mes entrante, ajustando l...","acuerdos":"","prediccion_exito":5,"sentimiento":3,"dolores":"- Dolor: Falta de visibilidad de los ejecutivos sobre sus propias metas.   Contexto: La cliente menciona que los ejecutivos se quejan constantemente porque no pueden ver sus metas personales en la aplicación, lo que genera confusión y desmotivación.  - Dolor: Dificultad para motivar a ejecutivos con","objeciones":"- Objeción: Falta de visibilidad de las metas en la aplicación para los ejecutivos.   Contexto: La cliente mencionó que los trabajadores se quejan de que no pueden ver sus objetivos individuales en la","duracion":2653},{"id":"a5b1198c-7009-11f1-92ec-0a67e68988af","fecha":"2026-06-25","week":26,"month":6,"dow":3,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | NC | Eaton","tipo":"Venta Rewards","resumen":"La conversación transcurrió en un tono profesional, fluido y colaborativo, enfocada en explorar cómo la plataforma de Apprecio puede resolver la necesidad de Damián Carrera de implementar un sistema de incentivos para canales de venta y clientes fina...","acuerdos":"Sí, Darling se comprometió a enviar por correo el catálogo, ficha de registro y contrato, y Damián indicó que revisará esta información tras su reunión con el cliente.","prediccion_exito":5,"sentimiento":3,"dolores":"- Dolor: Falta de herramientas para incentivar a su canal de ventas.   Contexto: El cliente mencionó que están iniciando una campaña de fidelización y no tienen ningún sistema para gestionar premios o beneficios que incentiven la promoción de sus productos.  - Dolor: Procesos complejos o ineficiente","objeciones":"- Objeción: Dificultad burocrática para crear proveedores nuevos.    Contexto: El cliente mencionó que el proceso interno de alta de proveedores es muy largo y complejo, por lo que probablemente deban","duracion":1375},{"id":"468f2a58-6e55-11f1-a4a6-0a67e68988af","fecha":"2026-06-25","week":26,"month":6,"dow":3,"kam":"Alvaro Agliati","cliente":"Alianza Estratégica","nombre_reunion":"Alianza Estratégica | Felicity360 ","tipo":"Exploración Apprecio Beat","resumen":"La conversación se desarrolla en un tono profesional, colaborativo y con un alto interés mutuo por establecer una alianza estratégica de integración tecnológica. El contexto es una reunión exploratoria entre el equipo de Apprecio y los representantes...","acuerdos":"","prediccion_exito":5,"sentimiento":3,"dolores":"- Dolor: Gestión operativa ineficiente de programas de incentivos.   Contexto: El cliente describe la compra y gestión de gift cards como un cacho o una carga administrativa que distrae a su equipo de sus funciones principales.  - Dolor: Desperdicio de tiempo en tareas administrativas ajenas a su es","objeciones":"- Objeción: Desconocimiento del costo de la alianza para poder ofrecer el servicio a sus clientes.     Contexto: El cliente mencionó que necesita un estimado de precios o rangos de inversión para pode","duracion":1251},{"id":"ff8939e6-7016-11f1-996d-0a67e68988af","fecha":"2026-06-25","week":26,"month":6,"dow":3,"kam":"Camilo Figueroa","cliente":"Paneles MOK","nombre_reunion":"Paneles MOK","tipo":"Mantención Fuerza/Smart Loyalty","resumen":"La conversación mantiene un tono colaborativo y resolutivo, centrado en optimizar la gestión administrativa de los programas de incentivos y fidelización de la empresa del cliente. Camilo Figueroa y Pablo Neira trabajan coordinadamente para simplific...","acuerdos":"","prediccion_exito":5,"sentimiento":3,"dolores":"- Dolor: Falta de orden y centralización en la gestión de sus paneles.   Contexto: El cliente cuenta con múltiples paneles dispersos para distintas áreas y razones sociales, lo que dificulta saber quién tiene acceso, cuánto saldo hay y cómo distribuirlo correctamente.  - Dolor: Dificultad para visua","objeciones":"- Objeción: Preocupación por la pérdida del historial de movimientos al unificar los paneles.   Contexto: El cliente mencionó que si se eliminan los paneles antiguos para centralizar todo, necesita as","duracion":942},{"id":"7608c180-6e7e-11f1-be8a-0a67e68988af","fecha":"2026-06-24","week":26,"month":6,"dow":2,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | Incentivos | Beneficios","tipo":"Venta Rewards","resumen":"La conversación mantuvo un tono profesional, fluido y colaborativo, centrado en la exploración de una solución eficiente para la gestión de incentivos laborales. Darling Allendes orientó a Jackelyn Cueva sobre el ecosistema de fidelización de Appreci...","acuerdos":"La ejecutiva envió un correo con la ficha de registro, el catálogo y las instrucciones necesarias para concretar la compra, y la cliente manifestó que tomará una decisión esta semana.","prediccion_exito":5,"sentimiento":3,"dolores":"- Dolor: Carga operativa en la gestión de incentivos.   Contexto: La cliente busca una solución porque actualmente percibe que el proceso de compra, recepción y distribución física de gift cards le tomaría demasiado tiempo y esfuerzo administrativo.  - Dolor: Dificultad para ofrecer flexibilidad en ","objeciones":"- Objeción: Desconocimiento sobre el funcionamiento del servicio.   Contexto: La clienta manifestó no entender claramente si la plataforma entregaba gift cards directamente o si existía algún otro sis","duracion":804},{"id":"b06dbae8-6eff-11f1-9372-0a67e68988af","fecha":"2026-06-24","week":26,"month":6,"dow":2,"kam":"Camilo Figueroa","cliente":"Apprecio - Metalkit","nombre_reunion":"Apprecio - Metalkit","tipo":"Mantención Fuerza/Smart Loyalty","resumen":"La conversación presenta un tono colaborativo, profesional y altamente orientativo, centrado en resolver las necesidades operativas de la cliente Marjorie tras la creación de una nueva cuenta para su empresa. Camilo Figueroa lidera el encuentro con u...","acuerdos":"","prediccion_exito":5,"sentimiento":3,"dolores":"- Dolor: Desconocimiento sobre el funcionamiento de la plataforma.   Contexto: La cliente admitió que no tenía acceso al panel y que no comprendía cómo se gestionaba el programa de incentivos.  - Dolor: Dificultad operativa por procesos de carga manual.   Contexto: La cliente no sabía realizar la di","objeciones":"- Objeción: Desconocimiento sobre el funcionamiento de la plataforma.   Contexto: Marjorie admitió abiertamente que no conocía cómo funcionaba el panel ni qué implicaba el servicio, ya que apenas se e","duracion":1023},{"id":"aee4bcf4-6e72-11f1-9c18-0a67e68988af","fecha":"2026-06-23","week":26,"month":6,"dow":1,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | NC | Labmac S.A.","tipo":"Exploración Smart Loyalty","resumen":"La conversación mantiene un tono profesional, colaborativo y exploratorio, centrándose en evaluar la viabilidad de implementar una estrategia de fidelización para los productos de un laboratorio natural en el mercado ecuatoriano.  Perfil del Cliente ...","acuerdos":"","prediccion_exito":4,"sentimiento":3,"dolores":"- Dolor: Falta de lealtad y recompra de los clientes.   Contexto: El cliente menciona que sus productos se venden en diversos puntos externos y quiere incentivar a los consumidores a elegir su marca sobre la competencia para asegurar la recurrencia.  - Dolor: Dificultad para validar compras en canal","objeciones":"- Objeción: Incapacidad de redimir puntos en productos propios de la marca. Contexto: El cliente busca que sus consumidores canjeen puntos por sus propios productos, pero la plataforma actualmente sol","duracion":1956},{"id":"ca96d494-6e6f-11f1-a5a0-0a67e68988af","fecha":"2026-06-23","week":26,"month":6,"dow":1,"kam":"Camilo Figueroa","cliente":"Iacc- Apprecio","nombre_reunion":"Iacc- Apprecio","tipo":"Mantención Fuerza/Smart Loyalty","resumen":"La conversación mantiene un tono colaborativo y resolutivo, centrado en la capacitación técnica para otorgar autonomía al cliente en la gestión de su plataforma. Camilo Figueroa guía a Cristian Romero en el uso del panel administrativo para optimizar...","acuerdos":"","prediccion_exito":5,"sentimiento":3,"dolores":"- Dolor: Inseguridad sobre la trazabilidad de las acciones en el panel.   Contexto: El cliente mencionó su preocupación por no dejar un registro claro o perder el control al delegar el acceso a otros usuarios dentro de la plataforma.  - Dolor: Dificultad para identificar al responsable de cada carga","objeciones":"- Objeción: Preocupación por perder el control y el registro de quién realiza las cargas de puntos en la plataforma al delegar el acceso a terceros. Contexto: El cliente manifestó inquietud sobre cómo","duracion":699},{"id":"dcc8511c-6e54-11f1-a4ca-0a67e68988af","fecha":"2026-06-23","week":26,"month":6,"dow":1,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio| Felicity 360 | Lipigas","tipo":"Seguimiento clientes actuales","resumen":"La conversación refleja un tono colaborativo y estratégico, centrado en explorar una alianza comercial que permita integrar las soluciones de Apprecio dentro de la plataforma de gestión de recursos humanos utilizada por el cliente. El contexto princi...","acuerdos":"","prediccion_exito":5,"sentimiento":3,"dolores":"- Dolor: Gestión manual e ineficiente de los beneficios y recompensas.   Contexto: Felipe señala que, aunque el proceso actual con el cliente Lipigas funciona, requiere una carga operativa manual que es mejorable mediante la automatización.  - Dolor: Fricción en la experiencia del usuario por falta ","objeciones":"- Objeción: Dudas sobre la complejidad técnica y la experiencia del usuario al integrar las plataformas para el cliente actual.    Contexto: Felipe cuestionó si, al mover a los usuarios de un sistema ","duracion":1081},{"id":"fbd2ddf0-6b40-11f1-8197-06053e84bb19","fecha":"2026-06-22","week":26,"month":6,"dow":0,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | NC | Felicity 360","tipo":"Exploración Smart Loyalty","resumen":"La conversación transcurrió en un tono profesional, colaborativo y altamente constructivo, centrada en explorar una alianza estratégica que permita integrar las soluciones tecnológicas de ambas empresas para optimizar la experiencia de sus clientes c...","acuerdos":"","prediccion_exito":5,"sentimiento":3,"dolores":"- Dolor: Gestión manual y operativa de beneficios.   Contexto: El cliente explicó que el proceso actual de entrega de gift cards implica una carga de trabajo administrativa alta, ya que deben gestionar la descarga, envío y respaldo de cada incentivo de forma manual.  - Dolor: Ineficiencia en la entr","objeciones":"- Objeción: Dificultad en la integración técnica del catálogo.     Contexto: El cliente expresó preocupación sobre cómo conectar su plataforma con la de Aprecio sin que la experiencia del usuario se s","duracion":2562},{"id":"e17e775a-6be2-11f1-a579-06053e84bb19","fecha":"2026-06-22","week":26,"month":6,"dow":0,"kam":"Camilo Figueroa","cliente":"Agrosuper - Apprecio","nombre_reunion":"Agrosuper - Apprecio","tipo":"Exploración Apprecio Beat","resumen":"La conversación se desarrolló en un tono profesional, cercano y colaborativo, enfocándose en la presentación del nuevo producto Aprecio Bit y su potencial para fortalecer la cultura organizacional y la gestión de incentivos en Agrosúper. Jorge Andrés...","acuerdos":"","prediccion_exito":5,"sentimiento":3,"dolores":"- Dolor: Complejidad administrativa en la gestión de pagos y órdenes de compra.   Contexto: El cliente señala que la gestión de incentivos genera fricción operativa, ya que requiere procesar órdenes de compra específicas para depositar fondos en una agencia, lo cual añade carga administrativa.  - Do","objeciones":"- Objeción: Limitación estricta del presupuesto para incentivos.   Contexto: El cliente explicó que no puede ofrecer premios que superen los rangos de sus pozos comisionables, ya que esto distrae a lo","duracion":1877},{"id":"2b557a0c-6a55-11f1-b086-06053e84bb19","fecha":"2026-06-19","week":25,"month":6,"dow":4,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | NC | HRDay Sermecoop","tipo":"Exploración Smart Loyalty","resumen":"La conversación mantiene un tono profesional, colaborativo y exploratorio, centrado en evaluar la viabilidad de integrar soluciones de fidelización en un modelo de negocio de seguros complementarios. Darling Allendes guía la charla enfocándose en cóm...","acuerdos":"","prediccion_exito":4,"sentimiento":3,"dolores":"- Dolor: Ineficiencia en la gestión de procesos internos.   Contexto: Las clientas mencionaron que actualmente manejan diversos procesos y flujos de trabajo de manera manual, lo que dificulta la operatividad.  - Dolor: Alto costo proyectado para programas de fidelización masivos.   Contexto: Al cons","objeciones":"- Objeción: El costo financiero para implementar el plan de fidelización a gran escala es inasumible.    Contexto: Roxana manifestó que al tener 50.000 socios, el presupuesto requerido para entregar u","duracion":1109},{"id":"277ed74a-6a67-11f1-b43b-06053e84bb19","fecha":"2026-06-19","week":25,"month":6,"dow":4,"kam":"Benjamín Castro","cliente":"Revisión casos Hackeo","nombre_reunion":"Revisión casos Hackeo ","tipo":"Seguimiento clientes actuales","resumen":"La conversación mantiene un tono profesional, colaborativo y de confianza, centrado en la resolución técnica de incidencias en Perú y la planificación de estrategias de fidelización para los colaboradores de Intel. Benjamín de Apprecio demuestra proa...","acuerdos":"","prediccion_exito":4,"sentimiento":2,"dolores":"- Dolor: Vulnerabilidades de seguridad en la plataforma.   Contexto: El equipo de ciberseguridad de Intel está revisando todos los portales y ha detectado fallas en los proveedores, lo que pone en riesgo la continuidad del servicio contratado.  - Dolor: Inseguridad y falta de cultura preventiva en u","objeciones":"- Objeción: Posible bloqueo del servicio por parte de ciberseguridad.    Contexto: El cliente advirtió que si su equipo interno detecta muchas vulnerabilidades en la plataforma de Apprecio, podrían ex","duracion":2248},{"id":"59d83784-6b27-11f1-b4e1-06053e84bb19","fecha":"2026-06-19","week":25,"month":6,"dow":4,"kam":"Lorenzo Jamasmie","cliente":"Dudas Plataforma y Gift Cards","nombre_reunion":"Dudas Plataforma y Gift Cards","tipo":"Seguimiento clientes actuales","resumen":"La conversación refleja un tono colaborativo y propositivo, enmarcado en una sesión de seguimiento comercial destinada a optimizar el uso de la plataforma Apprecio por parte de las clientes, a pesar de los desafíos técnicos de conectividad durante la...","acuerdos":"","prediccion_exito":4,"sentimiento":3,"dolores":"- Dolor: Complejidad en la gestión manual de incentivos.   Contexto: Las clientas deben recurrir constantemente al ejecutivo para gestionar la reversa de puntos y solicitar cada gift card, lo que hace el proceso lento y dependiente de un tercero.  - Dolor: Falta de una plataforma unificada para bene","objeciones":"- Objeción: Dificultad para gestionar el cambio cultural hacia una plataforma digital.   Contexto: Las clientas explicaron que su equipo, compuesto principalmente por agentes de venta de avanzada, pre","duracion":3408},{"id":"69948210-69c2-11f1-9a81-06053e84bb19","fecha":"2026-06-19","week":25,"month":6,"dow":4,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | NC | PONTIFICIA UNIVERSIDAD CATÓLICA DE VALPARAÍSO","tipo":"Venta Rewards","resumen":"La conversación se desarrolló en un tono cercano y colaborativo, con Darling Allendes posicionando la propuesta de valor de Apprecio ante un prospecto en fase de exploración. El contexto se centró en evaluar la modernización de los sistemas de benefi...","acuerdos":"La ejecutiva enviará un correo con la ficha de registro, contrato, catálogo y brochure para que el cliente lo presente a su jefatura.","prediccion_exito":4,"sentimiento":3,"dolores":"- Dolor: Procesos administrativos anticuados.   Contexto: El cliente describe que el funcionamiento actual de la universidad es todo muy a la antigua, lo que limita la innovación en la gestión de beneficios.  - Dolor: Limitaciones en la flexibilidad de los beneficios.   Contexto: El cliente menciona","objeciones":"- Objeción: Necesidad de aprobación interna antes de avanzar.    Contexto: Luciano mencionó que aún no le ha presentado la propuesta a su jefatura y se encuentra en una etapa de exploración para evalu","duracion":1010},{"id":"ea8c9f34-6a52-11f1-97fb-06053e84bb19","fecha":"2026-06-18","week":25,"month":6,"dow":3,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | NC | Cbc Peruana ","tipo":"Venta Rewards","resumen":"La conversación transcurre en un tono profesional, colaborativo y exploratorio, donde Darling Allendes logra alinear las expectativas de Stephanie Parsons y Jose Luis Martinez Tapia con la propuesta de valor de Apprecio, transformando la necesidad in...","acuerdos":"La ejecutiva enviará un resumen de la propuesta por correo electrónico y el cliente realizará el proceso interno de registro como proveedor para avanzar.","prediccion_exito":4,"sentimiento":3,"dolores":"- Dolor: Deseo de una experiencia de usuario visualmente enriquecida.     Contexto: El cliente quería que su programa fuera más elaborado y permitiera a los usuarios visualizar un catálogo de productos físicos (como televisores o refrigeradoras) en lugar de gestionar solo montos o créditos.  - Dolor","objeciones":"- Objeción: La plataforma no permite visualizar ni canjear productos físicos directamente, solo gift cards.   Contexto: El cliente buscaba una solución donde sus usuarios pudieran ver y seleccionar pr","duracion":1297},{"id":"d300a022-6a93-11f1-bce2-06053e84bb19","fecha":"2026-06-18","week":25,"month":6,"dow":3,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | NC | GoMind","tipo":"Ventas: Seguimiento","resumen":"La conversación transcurrió en un tono profesional, colaborativo y resolutivo, enfocado en definir la viabilidad técnica para la integración de los servicios de fidelización de Apprecio dentro de la plataforma de los clientes. El encuentro permitió a...","acuerdos":"","prediccion_exito":5,"sentimiento":3,"dolores":"- Dolor: Fricción en la experiencia de usuario al derivar a los clientes a una plataforma externa.   Contexto: A la cliente le preocupa que, si sus usuarios deben salir de su propio sistema para realizar canjes en Apprecio, se interrumpa el flujo y la experiencia dentro de su propia plataforma.  - D","objeciones":"- Objeción: Desconocimiento sobre el modelo de implementación adecuado para su plataforma.   Contexto: La cliente manifestó confusión al intentar combinar la gestión manual de puntos con la necesidad ","duracion":1147},{"id":"a59e819a-602e-11f1-9eb1-06053e84bb19","fecha":"2026-06-18","week":25,"month":6,"dow":3,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | NC | comercial portia ","tipo":"Exploración Apprecio Beat","resumen":"La conversación refleja una interacción profesional y exploratoria en la que Darling Allendes busca establecer una relación comercial con el equipo de RR.HH. de la empresa Portia, quienes actualmente gestionan incentivos a través de convenios específ...","acuerdos":"","prediccion_exito":3,"sentimiento":3,"dolores":"- Dolor: Limitación en el uso de los beneficios para los trabajadores.   Contexto: La clienta señala que al utilizar Giftcards de una sola cadena específica, los empleados no tienen flexibilidad para elegir dónde gastar sus incentivos.  - Dolor: Dificultad operativa en la administración de beneficio","objeciones":"- Objeción: La empresa ya tiene un convenio vigente que les impide realizar cambios.     Contexto: Verónica mencionó que actualmente trabajan con una gift card específica bajo un convenio colectivo qu","duracion":1112},{"id":"fc24fe42-6a8b-11f1-a0d1-06053e84bb19","fecha":"2026-06-18","week":25,"month":6,"dow":3,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | NC | limatco","tipo":"Venta Rewards","resumen":"La conversación presenta un tono profesional, fluido y cercano, centrado en la exploración comercial para una compra inmediata de incentivos. El ejecutivo Darling Allendes logró orientar al cliente sobre las soluciones disponibles, adaptando la ofert...","acuerdos":"La ejecutiva enviará un correo con la ficha de registro, el contrato y el catálogo de marcas para formalizar la compra de gift cards solicitada por el cliente.","prediccion_exito":4,"sentimiento":3,"dolores":"- Dolor: Dificultad para gestionar incentivos de forma ágil.   Contexto: El cliente necesita entregar regalos a sus proveedores con urgencia para fortalecer relaciones comerciales y busca una solución rápida para ejecutar esta acción.  - Dolor: Limitación en la flexibilidad de los premios entregados","objeciones":"- Objeción: Necesidad específica de gift cards para restaurantes en lugar de un catálogo general.    Contexto: El cliente inicialmente buscaba una solución cerrada para entregar premios de gastronomía","duracion":754},{"id":"f45a5c1a-68c0-11f1-9436-06053e84bb19","fecha":"2026-06-18","week":25,"month":6,"dow":3,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | Incentivos | Beneficios","tipo":"Exploración Smart Loyalty","resumen":"La conversación transcurrió en un tono profesional y exploratorio, donde los clientes buscaron comparar sus herramientas actuales de fidelización con las soluciones ofrecidas por Apprecio. El intercambio permitió clarificar el alcance del modelo de n...","acuerdos":"","prediccion_exito":2,"sentimiento":2,"dolores":"- Dolor: Falta de profundidad en los datos de gestión.   Contexto: El cliente señala que la plataforma actual entrega información demasiado básica y limitada, lo que impide realizar una gestión adecuada.  - Dolor: Inexistencia de una visión omnicanal del cliente.   Contexto: El sistema actual no int","objeciones":"- Objeción: La solución no permite fidelización exclusiva en su marca.     Contexto: Los clientes manifestaron que buscan un programa donde los usuarios solo puedan canjear puntos en sus productos y n","duracion":1666},{"id":"c6dd8ccc-6a54-11f1-bcc5-06053e84bb19","fecha":"2026-06-18","week":25,"month":6,"dow":3,"kam":"Benjamin González","cliente":"CA - ADT SECURITY SERVICES","nombre_reunion":"CA - ADT SECURITY SERVICES","tipo":"Seguimiento clientes actuales","resumen":"La conversación mantiene un tono profesional, cercano y entusiasta, centrándose en el fortalecimiento de la relación comercial y la exploración de nuevas soluciones tecnológicas para potenciar el compromiso de la fuerza de venta de ADT. El intercambi...","acuerdos":"","prediccion_exito":5,"sentimiento":3,"dolores":"- Dolor: Dificultad para escalar el presupuesto de incentivos.    Contexto: La clienta menciona que el presupuesto mensual está limitado a un monto fijo que no les autorizan subir, lo que restringe el alcance de sus programas.  - Dolor: Gestión manual del seguimiento de metas y resultados.    Contex","objeciones":"- Objeción: Desconfianza sobre la transparencia o funcionamiento de ciertas plataformas de experiencias.    Contexto: Carla mencionó que prefiere no comprar en Big Box porque no entiende bien cómo fun","duracion":1511},{"id":"2b6220d2-6a72-11f1-97c2-06053e84bb19","fecha":"2026-06-18","week":25,"month":6,"dow":3,"kam":"Maria Fernanda Torres","cliente":"Revisión contrato Banco BCI","nombre_reunion":"Revisión contrato Banco BCI","tipo":"Propuesta Comercial Apprecio Beat","resumen":"La conversación mantiene un tono profesional, colaborativo y orientado a la resolución de requerimientos técnicos necesarios para formalizar la relación comercial. El intercambio se centra en despejar las dudas del cliente sobre los protocolos de seg...","acuerdos":"","prediccion_exito":4,"sentimiento":3,"dolores":"","objeciones":"- Objeción: Falta de un plan de contingencia y continuidad operativa formalizado.    Contexto: El cliente indicó que, por políticas internas del banco, es una exigencia obligatoria contar con protocol","duracion":662},{"id":"9e25f6f4-6a89-11f1-b8b0-06053e84bb19","fecha":"2026-06-18","week":25,"month":6,"dow":3,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio| NC | Xplora","tipo":"Venta Rewards","resumen":"La conversación mantiene un tono profesional, colaborativo y exploratorio. El cliente busca digitalizar y optimizar la gestión de incentivos y premios para los colaboradores del Grupo Lucky, superando las limitaciones logísticas de los formatos actua...","acuerdos":"El cliente se comprometió a revisar el material enviado con su equipo y coordinar una próxima reunión para presentar la solución a los responsables de la toma de decisiones.","prediccion_exito":4,"sentimiento":3,"dolores":"- Dolor: Ineficiencia en la gestión y entrega de premios físicos.   Contexto: El cliente señala que el trámite actual es muy largo y genera problemas logísticos cuando los colaboradores se encuentran en provincia.  - Dolor: Riesgo operativo y errores en la gestión de incentivos.   Contexto: Se prese","objeciones":"- Objeción: Necesidad de involucrar a otros tomadores de decisión para la aprobación final. Contexto: El cliente aclaró que es practicante y debe presentar la propuesta al analista de eventos y a su g","duracion":867},{"id":"d65ed02e-6a6e-11f1-9614-06053e84bb19","fecha":"2026-06-17","week":25,"month":6,"dow":2,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | NC| Also Seguirdad","tipo":"Venta Rewards","resumen":"La conversación se desarrolla en un tono profesional, cercano y resolutivo, centrado en evaluar el cambio de proveedor para la gestión de incentivos de ventas. Darling Allendes guía a Paula, quien busca optimizar su tiempo y evitar los problemas oper...","acuerdos":"La ejecutiva envió la ficha de registro y el contrato para que la cliente los presente a su jefe y se gestionen los primeros días de julio.","prediccion_exito":5,"sentimiento":3,"dolores":"- Dolor: Gestión ineficiente y burocrática de los incentivos.   Contexto: La cliente explica que el proceso actual le obliga a generar múltiples órdenes de compra por cada pequeño grupo de trabajadores, lo cual le quita mucho tiempo de gestión.  - Dolor: Falta de respuesta y soporte técnico de su ac","objeciones":"- Objeción: Incertidumbre sobre el soporte y la atención personalizada.   Contexto: Paula preguntó explícitamente si tendría un ejecutivo asignado o si todo sería gestionado fríamente vía correo, most","duracion":1149},{"id":"5555cfb6-6a5d-11f1-9dfa-06053e84bb19","fecha":"2026-06-17","week":25,"month":6,"dow":2,"kam":"Benjamín Castro","cliente":"William / Benjamín","nombre_reunion":"William / Benjamín","tipo":"Exploración Apprecio Beat","resumen":"La conversación presenta un tono cordial y profesional, caracterizado por el interés de Benjamín Castro en retomar el contacto comercial con William Ponce Gonzalez tras la reestructuración corporativa de Inchcape. Se identifica una oportunidad clara ...","acuerdos":"","prediccion_exito":5,"sentimiento":3,"dolores":"- Dolor: Subutilización de la plataforma actual.   Contexto: El cliente admite que actualmente solo emplean la herramienta para el pago de bonos e incentivos, desaprovechando el potencial completo de la plataforma.  - Dolor: Dificultad para unificar la gestión de incentivos entre múltiples marcas.  ","objeciones":"- Objeción: Duda sobre la necesidad de cambiar de proveedor o plataforma. Contexto: El cliente mencionó que actualmente ya cuentan con una plataforma externa y otros procesos digitales internos gestio","duracion":706},{"id":"c8f9dc9c-669c-11f1-9822-06053e84bb19","fecha":"2026-06-16","week":25,"month":6,"dow":1,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | Incentivos | Beneficios","tipo":"Venta Rewards","resumen":"La conversación presenta un tono profesional, entusiasta y colaborativo, donde Darling Allendes logra sintonizar con la necesidad de innovación de los clientes, facilitando una transición fluida hacia una solución digital y flexible. El intercambio s...","acuerdos":"La ejecutiva enviará un correo con la documentación necesaria para la implementación y se acordó una capacitación técnica una vez realizada la primera compra.","prediccion_exito":5,"sentimiento":3,"dolores":"- Dolor: Falta de flexibilidad y personalización en los incentivos actuales.     Contexto: El cliente siente que los premios que entregan (entradas al cine y gift cards específicas) no son valorados por todos los colaboradores por igual, ya que no siempre se ajustan a sus gustos o necesidades reales","objeciones":"- Objeción: Incertidumbre sobre si el sistema ofrecía productos físicos o solo tarjetas de regalo.    Contexto: Daniela preguntó inicialmente si la plataforma contaba con un catálogo de productos físi","duracion":1074},{"id":"3934d8ea-68e1-11f1-99c6-06053e84bb19","fecha":"2026-06-16","week":25,"month":6,"dow":1,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | NC | Gloabl tic","tipo":"Exploración Smart Loyalty","resumen":"La conversación mantiene un tono profesional, cercano y colaborativo, centrado en explorar una alianza estratégica para la gestión de incentivos y fidelización de colaboradores. El diálogo destaca por la disposición de ambas partes para alinear las n...","acuerdos":"","prediccion_exito":5,"sentimiento":3,"dolores":"- Dolor: Dificultad para centralizar y gestionar beneficios para sus colaboradores.   Contexto: La cliente busca una solución que integre beneficios, como descuentos y programas de incentivos, para dos razones sociales distintas (Global TIC y Niuma) que suman cerca de 380 personas.  - Dolor: Necesid","objeciones":"- Objeción: Dudas sobre la naturaleza fiscal del servicio y cómo se formaliza la operación ante la ley.    Contexto: La cliente mostró confusión al notar que el servicio no emite una factura convencio","duracion":951},{"id":"b5b61aba-66ce-11f1-b984-06053e84bb19","fecha":"2026-06-16","week":25,"month":6,"dow":1,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | Incentivos | Beneficios","tipo":"Venta Rewards","resumen":"La conversación transcurrió en un tono cercano, colaborativo y distendido, enmarcada en una reunión de prospección donde se exploró una solución de incentivos para el canal tradicional de la empresa del cliente. El ambiente permitió establecer una re...","acuerdos":"La ejecutiva enviará un correo con la información del producto y se acordó realizar una presentación para el área comercial en una segunda instancia.","prediccion_exito":5,"sentimiento":3,"dolores":"- Dolor: Carga operativa y logística excesiva en la entrega de premios físicos.   Contexto: La cliente mencionó que realizar programas de incentivos con productos físicos (como electrodomésticos) encarece toda la gestión y dificulta la operatividad.  - Dolor: Falta de una solución ágil para incentiv","objeciones":"- Objeción: Preocupación por marcas de la competencia presentes en el catálogo.   Contexto: Stephanie señaló que, al ser embotelladores, a veces observan si el programa incluye productos o servicios d","duracion":1543},{"id":"b7baf0c2-659a-11f1-b76a-06053e84bb19","fecha":"2026-06-15","week":25,"month":6,"dow":0,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | Incentivos | Beneficios","tipo":"Venta Rewards","resumen":"La conversación mantiene un tono profesional, colaborativo y exploratorio, centrado en identificar si la plataforma de Apprecio puede integrarse como una solución para el bienestar y la retención de talento. El cliente busca herramientas que permitan...","acuerdos":"La ejecutiva enviará un correo con el brochure y el catálogo para que el cliente lo presente a su jefatura.","prediccion_exito":2,"sentimiento":3,"dolores":"- Dolor: Impacto en el rendimiento laboral por factores personales.   Contexto: El cliente detectó que sus colaboradores tienen un desempeño bajo debido a problemas anímicos y personales ajenos al trabajo.  - Dolor: Falta de sostenibilidad en las estrategias de apoyo a empleados.   Contexto: Actualm","objeciones":"- Objeción: La solución no cubre el área de salud mental que el cliente necesita prioritariamente.    Contexto: El cliente busca específicamente apoyo psicológico o clínico para sus colaboradores, mie","duracion":747},{"id":"1a1bf89e-6670-11f1-bfae-06053e84bb19","fecha":"2026-06-15","week":25,"month":6,"dow":0,"kam":"Benjamin González","cliente":"CA - Bci Seguros","nombre_reunion":"CA - Bci Seguros","tipo":"Seguimiento clientes actuales","resumen":"La conversación transcurrió en un tono profesional, cercano y pedagógico, centrada en la transferencia de responsabilidades de la cuenta del área de marketing salud de BCI hacia Nicolás, el nuevo responsable. Benjamín González lideró la sesión con el...","acuerdos":"","prediccion_exito":5,"sentimiento":3,"dolores":"- Dolor: Falta de conocimiento sobre la herramienta.   Contexto: Nicolás manifestó explícitamente que no conocía cómo funciona la plataforma y le faltaba claridad sobre la operativa general del servicio.  - Dolor: Riesgo de desorden o falta de trazabilidad en la gestión de puntos.   Contexto: El cli","objeciones":"- Objeción: Desconocimiento sobre el funcionamiento y herramientas de la plataforma.   Contexto: Nicolás admitió que, aunque sabe que la empresa trabaja con Apprecio, no conoce los detalles de cómo op","duracion":2615},{"id":"557189b8-64db-11f1-a6a6-06053e84bb19","fecha":"2026-06-15","week":25,"month":6,"dow":0,"kam":"Benjamín Castro","cliente":"Revisión Panel Programa Incentivo Canales","nombre_reunion":"Revisión Panel Programa Incentivo Canales","tipo":"Mantención Fuerza/Smart Loyalty","resumen":"La reunión transcurrió en un ambiente colaborativo y distendido, centrado en la revisión y ajuste funcional de los paneles de control de incentivos. El objetivo principal fue optimizar la claridad de la información financiera y operativa que consumir...","acuerdos":"","prediccion_exito":5,"sentimiento":3,"dolores":"- Dolor: Confusión en los conceptos y términos financieros del panel.     Contexto: Los clientes manifestaron que los nombres actuales de las variables (como abonados, saldo del panel o presupuesto total) son poco claros y contradictorios, lo que dificulta que los canales entiendan qué representa re","objeciones":"- Objeción: Confusión en los conceptos y nombres de las métricas presentadas en el panel.   Contexto: Maritza y Francisco señalaron que los términos actuales (como abonado, saldo del panel y presupues","duracion":2437},{"id":"2545aea4-68be-11f1-9436-06053e84bb19","fecha":"2026-06-15","week":25,"month":6,"dow":0,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | CP | SINCEX HUUS ","tipo":"Seguimiento clientes actuales","resumen":"La conversación mantiene un tono profesional, colaborativo y cercano, centrado en habilitar a Boris Navarrete para el uso autónomo de la plataforma de fidelización de Apprecio. La interacción refuerza la confianza del cliente al resolver exitosamente...","acuerdos":"","prediccion_exito":5,"sentimiento":3,"dolores":"- Dolor: Dificultad operativa para iniciar el uso de la plataforma.   Contexto: El cliente manifestó desconocimiento sobre cómo crear usuarios y gestionar la carga de puntos al ser un proceso nuevo para él.  - Dolor: Falta de claridad en los procesos de autenticación.   Contexto: El cliente expresó ","objeciones":"- Objeción: Dificultad para localizar y acceder al panel de administración.   Contexto: El cliente no encontraba el correo con la contraseña provisoria y presentó problemas técnicos iniciales para com","duracion":1031},{"id":"b8e80b52-65ad-11f1-af61-06053e84bb19","fecha":"2026-06-12","week":24,"month":6,"dow":4,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | NC | Boetsch S.A","tipo":"Exploración Smart Loyalty","resumen":"La conversación transcurrió en un tono profesional, cercano y resolutivo, centrándose en cómo la plataforma de Apprecio puede optimizar los programas de incentivos y fidelización de un holding inmobiliario. Darling Allendes logró transmitir eficazmen...","acuerdos":"","prediccion_exito":4,"sentimiento":3,"dolores":"- Dolor: Rigidez en los incentivos entregados.   Contexto: El cliente reconoce que las gift cards tradicionales amarran a los beneficiarios a una sola marca, limitando sus opciones de elección.  - Dolor: Falta de diversidad en los premios.   Contexto: Existe la necesidad de ofrecer alternativas más ","objeciones":"- Objeción: Duda sobre el tratamiento contable del beneficio.    Contexto: El cliente preguntó cómo se gestiona el registro del incentivo en la liquidación de sueldo de los trabajadores, dado que le p","duracion":1837},{"id":"5961cfb4-65ae-11f1-a93b-06053e84bb19","fecha":"2026-06-11","week":24,"month":6,"dow":3,"kam":"Camilo Figueroa","cliente":"Pompeyo- Apprecio","nombre_reunion":"Pompeyo- Apprecio","tipo":"Exploración Apprecio Beat","resumen":"La conversación mantiene un tono profesional, directo y colaborativo, centrándose en la operativa técnica y administrativa para habilitar el programa de incentivos del área comercial del cliente. Camilo Figueroa guía a Rafael Lillo en la configuració...","acuerdos":"","prediccion_exito":5,"sentimiento":3,"dolores":"- Dolor: Dificultad para gestionar solicitudes pendientes.   Contexto: El cliente mencionó con molestia que aún tiene dos requerimientos (gift cards) pendientes desde hace tres meses.  - Dolor: Falta de autonomía y centralización en la gestión de puntos.   Contexto: El cliente expresó confusión sobr","objeciones":"- Objeción: Desconocimiento sobre el procedimiento administrativo para realizar las cargas de puntos. Contexto: Rafael manifestó dudas sobre cómo solicitar la carga, preguntando explícitamente cómo fu","duracion":687},{"id":"48a4a0ea-6511-11f1-91db-06053e84bb19","fecha":"2026-06-11","week":24,"month":6,"dow":3,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | NC | camara de comercio de santiago","tipo":"Exploración Smart Loyalty","resumen":"La conversación se desarrolló en un tono profesional, colaborativo y exploratorio, centrándose en el diseño de un ecosistema de beneficios para una nueva aplicación de la Cámara de Comercio de Santiago. El objetivo principal fue evaluar soluciones de...","acuerdos":"","prediccion_exito":4,"sentimiento":3,"dolores":"- Dolor: Falta de incentivos para la formalización laboral de trabajadores independientes o informales.   Contexto: El cliente señala que a estas personas les resulta difícil ver la cotización como un beneficio, ya que priorizan la liquidez inmediata del día a día y perciben el sistema actual como u","objeciones":"- Objeción: Dificultad de uso tecnológico para el perfil de usuario final.   Contexto: Daniel planteó que su público objetivo (trabajadores informales) podría no ser digitalmente amigable, complicando","duracion":1789},{"id":"8afb433a-6512-11f1-bead-06053e84bb19","fecha":"2026-06-11","week":24,"month":6,"dow":3,"kam":"Benjamín Castro","cliente":"Inducción Apprecio","nombre_reunion":"Inducción Apprecio | Disecom","tipo":"Venta Rewards","resumen":"La conversación mantuvo un tono profesional, fluido y colaborativo, centrado en resolver los desafíos logísticos de la clienta respecto a sus programas de incentivos actuales. Benjamín Castro logró posicionar la propuesta de valor de Apprecio como un...","acuerdos":"Se acordó que Carla consultará con el cliente (Royal) y Ángel, y si dan el visto bueno, contactarán a Benjamín para avanzar con el proceso de creación de la cuenta y capacitación.","prediccion_exito":5,"sentimiento":3,"dolores":"- Dolor: Plazos de entrega excesivamente largos en la gestión de gift cards.   Contexto: Carla mencionó que los tiempos actuales de sus proveedores actuales le complican la operación cuando los clientes solicitan incentivos de forma urgente o a última hora.  - Dolor: Falta de flexibilidad y personal","objeciones":"- Objeción: Lentitud en los tiempos de entrega de las actuales gift cards.    Contexto: Carla señaló que los plazos de entrega de sus proveedores actuales son muy largos, lo cual le genera problemas c","duracion":770},{"id":"a8146bd6-6440-11f1-9465-06053e84bb19","fecha":"2026-06-11","week":24,"month":6,"dow":3,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | Incentivos | Beneficios","tipo":"Venta Rewards","resumen":"La conversación se desarrolla en un tono profesional, fluido y colaborativo, reflejando el interés genuino de la cliente por optimizar procesos operativos mediante una solución digital que ya conoce y valora positivamente. El contexto se centra en la...","acuerdos":"La ejecutiva envió la documentación necesaria (ficha, contrato, catálogo) y el cliente acordó gestionarlo internamente con el área de abastecimiento y gerencia para proceder con la alta como cliente y...","prediccion_exito":5,"sentimiento":3,"dolores":"- Dolor: Carga operativa excesiva en la compra de incentivos.    Contexto: La cliente explica que actualmente debe gestionar la compra de gift cards de forma recurrente cada mes, lo cual le consume tiempo y esfuerzo innecesario.  - Dolor: Dependencia y fricción con el proveedor actual.    Contexto: ","objeciones":"- Objeción: Posible retraso en la implementación debido a procesos internos de la empresa.   Contexto: Katherine mencionó que están pasando por reestructuraciones internas y necesita validar la propue","duracion":734},{"id":"0384be5a-5ab2-11f1-a26d-06254876e271","fecha":"2026-06-11","week":24,"month":6,"dow":3,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | NC | Silo-Logística","tipo":"Venta Rewards","resumen":"La conversación se desarrolla en un tono profesional, fluido y colaborativo, donde Darling Allendes logra explicar con claridad la propuesta de valor de Apprecio, adaptándose a la realidad logística y operativa de la empresa de Jose Undurraga. El cli...","acuerdos":"No se definió una reunión, demo o envío de propuesta formal, solo el envío de información general de contacto por parte de la ejecutiva.","prediccion_exito":4,"sentimiento":3,"dolores":"- Dolor: Limitaciones en las opciones de canje de las gift cards tradicionales.   Contexto: El cliente señala que al entregar tarjetas de un solo comercio, restringen la libertad de los trabajadores para elegir según sus propias necesidades y ubicación geográfica.  - Dolor: Dificultad para incentiva","objeciones":"- Objeción: Dificultad de adaptación tecnológica en parte del personal.   Contexto: El cliente mencionó que su equipo operativo en Casablanca no es muy amigable con la tecnología, lo que complica el u","duracion":801},{"id":"c53dc94e-6447-11f1-b0e5-06053e84bb19","fecha":"2026-06-11","week":24,"month":6,"dow":3,"kam":"Darling Allendes","cliente":"Presentación Apprecio Beat","nombre_reunion":"Presentación Apprecio Beat","tipo":"Exploración Smart Loyalty","resumen":"La conversación se desarrolló en un tono profesional, colaborativo y exploratorio, donde se analizaron posibles sinergias tecnológicas entre la plataforma de salud de los clientes y las soluciones de fidelización de Apprecio. El intercambio se centró...","acuerdos":"","prediccion_exito":5,"sentimiento":3,"dolores":"- Dolor: Mala experiencia de usuario (UX) en su plataforma actual.   Contexto: El cliente reconoce que la usabilidad de su sistema no es buena, lo que impide que los usuarios se sientan motivados a utilizar sus servicios.  - Dolor: Baja adopción y frecuencia de uso de la plataforma.   Contexto: El e","objeciones":"- Objeción: Dificultad técnica para integrar dos plataformas distintas.     Contexto: El cliente expresó dudas sobre cómo conectar técnicamente su sistema de salud con la plataforma de recompensas par","duracion":2299},{"id":"54436a4c-64e6-11f1-a110-06053e84bb19","fecha":"2026-06-11","week":24,"month":6,"dow":3,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | NC | Metro S.A.","tipo":"Ventas: Seguimiento","resumen":"La conversación transcurrió en un tono cercano, colaborativo y altamente profesional, centrada en la prospección comercial para Metro y una oportunidad de negocio adicional con su sindicato. Darling Allendes logró establecer una conexión de confianza...","acuerdos":"","prediccion_exito":5,"sentimiento":3,"dolores":"- Dolor: Procesos burocráticos lentos y tediosos.   Contexto: El cliente describe el proceso de licitación pública como odioso y lento, lo que genera frustración en la gestión de sus beneficios.  - Dolor: Dependencia de la gestión manual ante la pérdida de información.   Contexto: El cliente mencion","objeciones":"- Objeción: El proceso de licitación pública es lento y tedioso.   Contexto: El cliente expresó su frustración con la burocracia que implica este tipo de procesos para adjudicar el contrato.  - Objeci","duracion":1260},{"id":"895df6ec-6415-11f1-af2d-06053e84bb19","fecha":"2026-06-10","week":24,"month":6,"dow":2,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | Incentivos | Beneficios","tipo":"Exploración Smart Loyalty","resumen":"La conversación presenta un tono cordial y colaborativo, donde Darling Allendes logra establecer una relación de confianza con Wendolinne al identificar necesidades precisas de fidelización y reconocimiento. La interacción se centra en cómo las soluc...","acuerdos":"","prediccion_exito":5,"sentimiento":3,"dolores":"Necesidad de agregar valor real a sus socios: El cliente siente que su actual programa de fidelización es limitado y busca una propuesta más robusta para fortalecer el vínculo con sus socios.  Ineficiencia en la gestión de premios y reconocimientos: Actualmente, la empresa dedica tiempo y recursos e","objeciones":"Modelo de negocio cerrado: El cliente está interesado en la solución, pero su modelo de negocio se basa exclusivamente en créditos mediante descuento por planilla con convenios corporativos, lo que li","duracion":1222},{"id":"cf8dc82c-64d8-11f1-9bd5-06053e84bb19","fecha":"2026-06-10","week":24,"month":6,"dow":2,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | Incentivos | Beneficios","tipo":"Venta Rewards","resumen":"La conversación se desarrolla en un tono profesional, cercano y resolutivo, centrado en la evaluación de una solución de beneficios flexible para los colaboradores de la empresa TECCSIS. Darling Allendes guía el proceso comercial priorizando la clari...","acuerdos":"La ejecutiva enviará un correo con el contrato, ficha de registro y catálogo de beneficios para que la clienta pueda avanzar con la implementación.","prediccion_exito":5,"sentimiento":3,"dolores":"Necesidad de centralizar beneficios: Busca una solución general que permita a los colaboradores acceder a diversos tipos de descuentos y comercios, evitando contratar múltiples proveedores especializados para cada necesidad.    Gestión administrativa ineficiente: Desea evitar la carga operativa que ","objeciones":"El cliente muestra interés en la propuesta, pero teme que los colaboradores sean objeto de spam o publicidad invasiva por parte de la empresa, afectando su experiencia.    El cliente consulta sobre la","duracion":1210},{"id":"3d254926-6382-11f1-9d20-06053e84bb19","fecha":"2026-06-10","week":24,"month":6,"dow":2,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | Incentivos | Beneficios","tipo":"Venta Rewards","resumen":"La conversación se desarrolla en un tono cercano, profesional y colaborativo, con el objetivo de presentar la plataforma de Aprecio a un nuevo cliente interesado en optimizar la gestión de incentivos para su fuerza de venta. Darling Allendes logra tr...","acuerdos":"Se acordó el envío de una propuesta por correo electrónico con los datos de registro, contrato y bancarios para proceder con la implementación y carga de puntos.","prediccion_exito":5,"sentimiento":3,"dolores":"Limitación en la elección de premios: El cliente siente que las gift cards tradicionales de un solo comercio (retail o supermercado específico) no son lo suficientemente atractivas para los colaboradores, ya que no siempre se ajustan a sus preferencias personales.  Falta de flexibilidad en la redenc","objeciones":"El cliente pregunta por el modelo de negocio de la empresa, pero tiene dudas sobre cómo generan ingresos, ya que teme que esto implique un sobrecosto para su empresa al adquirir las gift cards.    El ","duracion":835},{"id":"cc842cdc-6449-11f1-ae32-06053e84bb19","fecha":"2026-06-10","week":24,"month":6,"dow":2,"kam":"N/A","cliente":"Puntos Apprecio","nombre_reunion":"Puntos Apprecio","tipo":"Seguimiento clientes actuales","resumen":"La conversación se desarrolló en un tono profesional, cercano y colaborativo, con el objetivo de establecer una relación directa entre Benjamín y el nuevo responsable de la cuenta para asegurar la continuidad y efectividad en la gestión de programas ...","acuerdos":"","prediccion_exito":5,"sentimiento":3,"dolores":"Incertidumbre sobre la gestión y responsabilidades: Falta de claridad interna respecto a quién será el responsable final de la cuenta de aprecio y cómo se distribuirá el trabajo entre los distintos colaboradores (Sebastián vs. el cliente).    Gestión operativa de reclamos: Preocupación por la carga ","objeciones":"Falta de claridad sobre las responsabilidades internas: El cliente conoce los procesos generales, pero no tiene definido todavía si él será el único encargado de la gestión o si continuará compartiend","duracion":947},{"id":"351541ae-634c-11f1-bd52-06053e84bb19","fecha":"2026-06-09","week":24,"month":6,"dow":1,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | Incentivos | Beneficios","tipo":"Venta Rewards","resumen":"La conversación entre Darling Allendes y Katherine Reyes se desarrolla en un tono colaborativo, profesional y altamente enfocado en la resolución de necesidades operativas. El contexto es una prospección comercial donde se busca digitalizar y flexibi...","acuerdos":"La ejecutiva enviará por correo una propuesta formal, cotización, contrato tipo y documentos para gestionar la línea de crédito, tras lo cual Katherine revisará la información con su jefatura.","prediccion_exito":5,"sentimiento":3,"dolores":"Bajo valor percibido de los incentivos actuales: Los premios entregados (experiencias) no son valorados por los ejecutivos, lo que genera insatisfacción o desinterés en los colaboradores.    Complejidad en la gestión de incentivos: La naturaleza externa de la fuerza de trabajo (call center terceriza","objeciones":"La empresa requiere que cualquier transacción o servicio esté respaldado por un contrato legal formal y auditable, pero deben incluir cláusulas específicas de seguridad de la información que son oblig","duracion":1228},{"id":"aa754038-6375-11f1-a6be-06053e84bb19","fecha":"2026-06-09","week":24,"month":6,"dow":1,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | NC | NUAM Perú","tipo":"Venta Rewards","resumen":"La conversación se desarrolló en un tono profesional, cercano y resolutivo, centrándose en cómo la solución de Apprecio puede optimizar la gestión de incentivos de una empresa multinacional. El contexto estuvo marcado por el interés de la cliente en ...","acuerdos":"La ejecutiva enviará por correo la ficha de registro, el brochure, los datos bancarios y la información para realizar la propuesta a la gerencia de la clienta.","prediccion_exito":5,"sentimiento":3,"dolores":"Ineficiencia en la gestión operativa: Dedica demasiado tiempo a la coordinación manual, compra y distribución física de las gift cards actuales, lo cual es un proceso lento y tedioso.  Falta de flexibilidad en los incentivos: Necesita una solución que permita a los colaboradores elegir sus propios p","objeciones":"La cliente debe presentar la propuesta a la gerencia, pero esta aún no ha sido aprobada, lo que condiciona la contratación del servicio.    La cliente requiere coordinar con el área de compras, pero n","duracion":778},{"id":"41b250d8-633c-11f1-ac96-06053e84bb19","fecha":"2026-06-08","week":24,"month":6,"dow":0,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | Incentivos | Beneficios","tipo":"Venta Rewards","resumen":"La conversación refleja una interacción profesional y exploratoria en la que se identifica un desajuste inicial respecto a las necesidades del cliente, permitiendo a la ejecutiva pivotar hacia una propuesta de valor alternativa. El contexto se centra...","acuerdos":"La ejecutiva acordó enviar información adicional (brochure y lista de empresas aliadas) sobre la solución de canje por efectivo tras el interés expresado por la cliente.","prediccion_exito":2,"sentimiento":2,"dolores":"Necesidad de un proveedor integral: El cliente busca una empresa que ejecute un evento de integración llave en mano (gestión completa y logística presencial), servicio que Apprecio no ofrece.    Percepción de oferta limitada: El cliente considera que el catálogo de comercios y la estructura de punto","objeciones":"La empresa busca un proveedor para la organización de un evento presencial llave en mano, pero Apprecio no ofrece servicios de logística o ejecución de eventos.    El cliente percibe que el modelo de ","duracion":411},{"id":"1a18e740-6057-11f1-bbaf-06053e84bb19","fecha":"2026-06-08","week":24,"month":6,"dow":0,"kam":"Benjamin González","cliente":"CA - Apprecio - Texas Ribs La Florida","nombre_reunion":"CA - Apprecio - Texas Ribs La Florida","tipo":"Venta Rewards","resumen":"La conversación mantiene un tono profesional, cercano y resolutivo, enmarcado en una videollamada para alinear las necesidades de incentivos de un nuevo cliente con la plataforma de Apprecio. Benjamin González logra establecer confianza rápidamente, ...","acuerdos":"Se acordó que el cliente completará la ficha de registro y revisará el contrato para avanzar con la primera carga de puntos esta semana.","prediccion_exito":5,"sentimiento":3,"dolores":"Necesidad de una solución de incentivos rápida: El cliente requiere implementar urgentemente un esquema de recompensas para cumplir con sus compromisos de gestión antes de terminar la semana.    Falta de conocimiento sobre la herramienta: El cliente no está familiarizado con el funcionamiento de la ","objeciones":"Dificultad de acceso por correo: El cliente manifestó interés en la plataforma, pero tuvo problemas previos para contactar a la empresa porque el sistema web bloqueaba sus direcciones de correo electr","duracion":1451},{"id":"2b74d218-6347-11f1-911f-06053e84bb19","fecha":"2026-06-08","week":24,"month":6,"dow":0,"kam":"Camilo Figueroa","cliente":"Apprecio","nombre_reunion":"Apprecio","tipo":"Mantención Fuerza/Smart Loyalty","resumen":"La conversación presenta un tono profesional, colaborativo y orientado a la resolución de problemas técnicos y operativos, reflejando una relación de confianza entre el ejecutivo y la cliente. El contexto se centra en la reorganización de los program...","acuerdos":"","prediccion_exito":5,"sentimiento":3,"dolores":"Desorganización interna tras la adquisición: Falta de claridad en la estructura de cuentas y gestión de puntos dentro de la plataforma tras la compra por parte de Inchcape.  Falta de continuidad y transferencia de conocimientos: Ausencia de un proceso de traspaso de información ante la salida de per","objeciones":"Desorganización interna tras la reestructuración de la empresa, pero la falta de un traspaso de información claro tras la salida de personal anterior dificulta conocer qué áreas de Derco ya tienen pro","duracion":923},{"id":"6142bb0e-5f86-11f1-a4e7-0ab7c93276f1","fecha":"2026-06-05","week":23,"month":6,"dow":4,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | NC | GoMind","tipo":"Exploración Smart Loyalty","resumen":"La conversación transcurre en un tono profesional, colaborativo y exploratorio, centrado en identificar soluciones de fidelización para los clientes de Goomin. Darling Allendes guía a las interlocutoras sobre cómo transformar modelos tradicionales de...","acuerdos":"","prediccion_exito":4,"sentimiento":3,"dolores":"Necesidad de incentivar el uso de su plataforma: Buscan una estrategia para fomentar que sus clientes finales interactúen más con su propia aplicación.  Falta de una solución de fidelización establecida: Admiten que actualmente no cuentan con un programa de incentivos o recompensas implementado.  In","objeciones":"Necesidad de aprobación interna: El equipo está interesado en la propuesta, pero deben presentarla formalmente ante su organización antes de tomar cualquier decisión.  Proceso de licitación externa: L","duracion":1492},{"id":"4d740422-5ead-11f1-a7a4-0ab7c93276f1","fecha":"2026-06-05","week":23,"month":6,"dow":4,"kam":"Darling Allendes","cliente":"CA: Reunión Calox Andina","nombre_reunion":"CA: Reunión Calox Andina","tipo":"Venta Rewards","resumen":"La conversación transcurrió en un tono cercano, colaborativo y distendido, con el objetivo de presentar la plataforma de incentivos y fidelización de Apprecio al equipo de Ecuador para evaluar su implementación operativa. Los participantes mostraron ...","acuerdos":"La ejecutiva enviará un correo con la ficha de registro para alta de cliente y los datos para proveedores, dando seguimiento al proceso.","prediccion_exito":5,"sentimiento":3,"dolores":"Necesidad de documentos tributarios válidos: El cliente requiere que el soporte entregado por la empresa (nota de entrega o factura de 0 impuestos) sea aceptado por el sistema contable local (SRI) para la correcta liquidación de gastos corporativos.    Gestión de diversidad tecnológica en los usuari","objeciones":"Duda sobre el proceso de liquidación de gastos: El cliente entiende la propuesta de valor, pero le preocupa que el documento entregado por Aprecio (nota de entrega exenta de impuestos) no sea suficien","duracion":2154},{"id":"1efd8f52-604f-11f1-907f-06053e84bb19","fecha":"2026-06-04","week":23,"month":6,"dow":3,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio| NC| Capitalizarme","tipo":"Ventas: Seguimiento","resumen":"La conversación mantiene un tono profesional, colaborativo y resolutivo, enfocado en facilitar la transición de la cliente hacia una nueva modalidad de gestión de incentivos. El contexto se centra en la adopción del ecosistema de recompensas de Appre...","acuerdos":"","prediccion_exito":5,"sentimiento":3,"dolores":"Desconocimiento sobre los requisitos legales: Existe incertidumbre respecto a la necesidad de firmar un contrato para este servicio, ya que en sus compras previas de gift cards tradicionales este paso no era requerido.  Incertidumbre sobre las obligaciones tributarias: Preocupación por el impacto ad","objeciones":"Requerimiento de firma de contrato: El cliente está dispuesto a contratar el servicio, pero cuestiona la necesidad de firmar un contrato formal, ya que en experiencias previas con otros proveedores de","duracion":1024},{"id":"dd2f65c6-5f6f-11f1-bd46-0ab7c93276f1","fecha":"2026-06-04","week":23,"month":6,"dow":3,"kam":"Darling Allendes","cliente":"Reunión Banco BCI","nombre_reunion":"Reunión Banco BCI","tipo":"Ventas: Seguimiento","resumen":"La conversación se desarrolla en un tono colaborativo y optimista, centrado en resolver los últimos trámites administrativos y técnicos para iniciar exitosamente el programa piloto. Existe una clara voluntad de ambas partes por alinear las expectativ...","acuerdos":"","prediccion_exito":5,"sentimiento":3,"dolores":"Complejidad en la validación de proveedores: Dificultad para cumplir con la ficha de criticidad del proveedor y requerimientos de ciberseguridad respecto a la tercerización de servicios (nube) y el flujo de datos.    Rigidez contractual: Incongruencia entre la duración estándar de los contratos de l","objeciones":"Requerimiento de información sobre proveedores externos: El servicio debe cumplir con la normativa de ciberseguridad del banco al utilizar servicios de nube, pero la empresa aún debe especificar la ub","duracion":1344},{"id":"575c8766-5aa2-11f1-9055-06254876e271","fecha":"2026-06-04","week":23,"month":6,"dow":3,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | NC -Construmart","tipo":"Venta Rewards","resumen":"La conversación presenta un tono colaborativo, profesional y cercano, enfocado en evaluar la viabilidad de implementar un programa de incentivos para asistentes de venta de la empresa de Javiera Morales Abarca a través de la plataforma Apprecio.  Int...","acuerdos":"Se acordó el envío de información (catálogo) y la gestión de contacto con el área de marketing para una posible alianza, además de quedar pendientes de la aprobación interna del programa del cliente.","prediccion_exito":4,"sentimiento":3,"dolores":"Limitaciones presupuestarias: La empresa carece de fondos para realizar aumentos salariales directos, lo que les impide compensar a sus colaboradores por las nuevas funciones de inducción.  Necesidad de control sobre la competencia: El cliente requiere imperativamente evitar que sus trabajadores uti","objeciones":"Restricción de competencia: El cliente necesita incentivar a sus trabajadores sin beneficiar a marcas competidoras, pero le preocupa que el catálogo de Apprecio incluya a dichas marcas y no poder bloq","duracion":1032},{"id":"4762f264-5ddb-11f1-b519-06254876e271","fecha":"2026-06-04","week":23,"month":6,"dow":3,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | Incentivos | Beneficios","tipo":"Venta Rewards","resumen":"La conversación se desarrolla en un tono profesional, colaborativo y de confianza, donde ambas partes exploran la implementación de un programa de incentivos para terceros. El intercambio se centra en validar la viabilidad operativa y legal de integr...","acuerdos":"La ejecutiva enviará la ficha de registro, el contrato y los datos bancarios para formalizar el proceso, con el objetivo de que el cliente realice su primera compra de puntos a finales de mes.","prediccion_exito":5,"sentimiento":3,"dolores":"Necesidad de un sistema de incentivos eficiente: El cliente busca una solución digital para premiar a vendedores externos por sus ventas, asegurando un modelo gana-gana que incentive la preferencia por sus productos frente a la competencia.    Complejidad en la gestión de recompensas: El cliente req","objeciones":"Preocupación por la naturaleza contractual de los incentivos, ya que el cliente teme que asignar puntos a terceros pueda generar una relación de dependencia laboral, pero busca claridad sobre si el us","duracion":1489},{"id":"e5cec21a-5ed1-11f1-b060-0ab7c93276f1","fecha":"2026-06-03","week":23,"month":6,"dow":2,"kam":"Lorenzo Jamasmie","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | NC - CAP| ","tipo":"Seguimiento clientes actuales","resumen":"La conversación presenta un tono profesional, colaborativo y de inducción técnica, enfocado en alinear la nueva gestión del sindicato de AFP Hábitat con las herramientas de fidelización de Apprecio. Existe un claro interés por parte del cliente en pr...","acuerdos":"","prediccion_exito":5,"sentimiento":3,"dolores":"Desconocimiento operativo del sistema: La cliente mencionó que, aunque conoce la plataforma como usuaria, no sabe cómo gestionar los procesos administrativos de carga y asignación de puntos.  Necesidad de actualización en los accesos: Existía una gestión desactualizada de los usuarios con privilegio","objeciones":"Falta de conocimiento técnico: La clienta desea utilizar la plataforma para realizar concursos y otras actividades más dinámicas, pero desconoce el funcionamiento operativo del sistema para llevar a c","duracion":1045},{"id":"778393be-5ecf-11f1-aa43-0ab7c93276f1","fecha":"2026-06-03","week":23,"month":6,"dow":2,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | CP | Lotus Producciones","tipo":"Seguimiento clientes actuales","resumen":"La conversación mantiene un tono profesional, colaborativo y de capacitación técnica, centrándose en asegurar que el equipo de Lotus logre una adopción exitosa y autónoma de la plataforma Apprecio para sus programas de reconocimiento interno.  Objeti...","acuerdos":"","prediccion_exito":5,"sentimiento":3,"dolores":"Desconocimiento sobre el funcionamiento técnico de la plataforma: Las usuarias no tenían claridad sobre cómo gestionar los accesos, la visualización del saldo y los procesos de carga de puntos.  Confusión sobre la metodología de carga de colaboradores: Existía incertidumbre respecto a si los emplead","objeciones":"Desconocimiento en el uso de la plataforma, pero manifestaron haber ingresado al sistema sin saber cómo gestionar las funciones administrativas básicas.    Falta de la herramienta de trabajo, pero la ","duracion":768},{"id":"80a69288-5eb2-11f1-a758-0ab7c93276f1","fecha":"2026-06-02","week":23,"month":6,"dow":1,"kam":"Camilo Figueroa","cliente":"Apprecio - Blue","nombre_reunion":"Apprecio - Blue","tipo":"Seguimiento clientes actuales","resumen":"La conversación mantiene un tono profesional, colaborativo y orientativo, centrado en la resolución eficiente de una necesidad social de la empresa cliente. Camilo Figueroa logra transformar una solicitud tradicional de gift card en una oportunidad p...","acuerdos":"","prediccion_exito":5,"sentimiento":3,"dolores":"Necesidad de respuesta urgente ante una emergencia: El cliente requiere gestionar una ayuda inmediata para un colaborador que sufrió la pérdida total de su vivienda por un incendio.  Desconocimiento de las alternativas de ayuda: El cliente no tiene claridad sobre la diferencia entre el uso de gift c","objeciones":"Desconocimiento del proceso de entrega, pero el cliente necesita confirmar si el procedimiento de solicitud de puntos requiere los mismos pasos administrativos (envío de nombre, correo y órdenes de co","duracion":468},{"id":"4762c302-5ddb-11f1-b213-06254876e271","fecha":"2026-06-01","week":23,"month":6,"dow":0,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | NC |  Clínica Hunza ","tipo":"Venta Rewards","resumen":"La conversación transcurre en un tono cercano, colaborativo y profesional, donde Darling Allendes logra reconectar con una exusuaria que busca profesionalizar y simplificar la gestión de incentivos para su clínica estética en Concepción. El objetivo ...","acuerdos":"La ejecutiva envió la documentación (ficha de registro, contrato y datos de facturación) y Claudia quedó en revisarlos con su colega para proceder con el registro y la carga de puntos.","prediccion_exito":5,"sentimiento":3,"dolores":"Gestión administrativa ineficiente: El proceso actual de comprar y entregar gift cards de una sola marca específica es lento y consume tiempo de gestión.  Falta de flexibilidad en los incentivos: La imposibilidad de ofrecer recompensas variadas (como entradas al cine o diversidad de comercios) limit","objeciones":"Dificultad de gestión con proveedores externos, pero la cliente tiene problemas para comprar y repartir premios específicos (como entradas al cine) de manera flexible y rápida para sus colaboradores. ","duracion":1243},{"id":"1c0a4f34-59f0-11f1-9b10-06254876e271","fecha":"2026-06-01","week":23,"month":6,"dow":0,"kam":"Darling Allendes","cliente":"Reunión  Apprecio","nombre_reunion":"Reunión  Apprecio","tipo":"Venta Rewards","resumen":"La conversación se desarrolla en un tono profesional, cercano y colaborativo, donde el objetivo principal es aclarar el funcionamiento de la plataforma Aprecio y despejar dudas legales y operativas para concretar una primera carga de incentivos. La c...","acuerdos":"La ejecutiva enviará un correo con el resumen de la reunión, la ficha de registro para el panel de empresa y el contrato para concretar la primera compra.","prediccion_exito":5,"sentimiento":3,"dolores":"Incertidumbre sobre el tratamiento tributario y legal: Preocupación por cómo registrar correctamente los incentivos (liquidación de sueldo vs. otros gastos) para evitar contingencias laborales ante la Dirección del Trabajo.    Temor a duplicidad de gastos: Inquietud sobre si al facturar la compra de","objeciones":"Implicancias tributarias y legales: La cliente comprende el modelo de puntos, pero le preocupa si la entrega de estos debe ser declarada obligatoriamente en la liquidación de sueldo y el impacto que e","duracion":1097},{"id":"c57e46e4-5abb-11f1-9f34-06254876e271","fecha":"2026-06-01","week":23,"month":6,"dow":0,"kam":"Darling Allendes","cliente":"Reunión Apprecio","nombre_reunion":"Reunión Apprecio | NC | OHCapital","tipo":"Venta Rewards","resumen":"La conversación se desarrolló en un tono profesional, colaborativo y resolutivo, con el objetivo de formalizar la incorporación de la empresa de Hanna Hodali al sistema de fidelización de Apprecio. Se alcanzó un acuerdo operativo claro para la gestió...","acuerdos":"El cliente debe enviar la ficha de registro y el contrato para la apertura de cuentas y así proceder con la primera compra de puntos.","prediccion_exito":5,"sentimiento":3,"dolores":"Gestión compleja de múltiples razones sociales: Dificultad para centralizar la administración y compra de incentivos debido a que operan con distintas inmobiliarias, cada una con un RUT y facturación independiente.    Necesidad de centralización administrativa: Requerimiento de una plataforma única ","objeciones":"Complejidad administrativa en la contratación: El cliente desea centralizar la relación comercial bajo una única razón social (OHC), pero el proceso requiere firmar contratos y llenar fichas de regist","duracion":1195}];
+
+const WEEK_LABELS = {23:'Sem 1 (Jun 1–6)',24:'Sem 2 (Jun 8–12)',25:'Sem 3 (Jun 15–19)',26:'Sem 4 (Jun 22–26)'};
+let filtered = [...RAW];
+let currentPage = 1;
+const ROWS_PER_PAGE = 15;
+let chartSemana, chartTipo, chartKam, chartCli;
+
+function tipoPill(tipo){
+  if(tipo.includes('Venta Rewards')) return `<span class="tipo-pill pill-venta">Venta Rewards</span>`;
+  if(tipo.includes('Seguimiento')) return `<span class="tipo-pill pill-seguimiento">Seguimiento</span>`;
+  if(tipo.includes('Smart Loyalty')) return `<span class="tipo-pill pill-exploracion">Smart Loyalty</span>`;
+  if(tipo.includes('Fuerza')) return `<span class="tipo-pill pill-explorafuerza">Exploración Fuerza</span>`;
+  return `<span class="tipo-pill pill-other">${tipo}</span>`;
+}
+function exitoDot(val){
+  const c = val>=4?'#00A878':val>=3?'#F4A325':'#D9534F';
+  return `<span class="success-dot" style="background:${c}"></span>${val}/5`;
+}
+
+let selectedKams = new Set();
+
+function populateFilters(){
+  const weeks=[...new Set(RAW.map(r=>r.week))].sort();
+  const kams=[...new Set(RAW.map(r=>r.kam))].filter(Boolean).sort();
+  const tipos=[...new Set(RAW.map(r=>r.tipo))].sort();
+  const fw=document.getElementById('f-week');
+  weeks.forEach(w=>{const o=document.createElement('option');o.value=w;o.textContent=WEEK_LABELS[w]||`Sem ${w}`;fw.appendChild(o);});
+  const list=document.getElementById('kam-list');
+  kams.forEach(k=>{
+    const item=document.createElement('label');
+    item.style.cssText='display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;font-size:13px;color:var(--ap-text)';
+    item.onmouseenter=()=>item.style.background='var(--ap-bg)';
+    item.onmouseleave=()=>item.style.background='';
+    const cb=document.createElement('input');
+    cb.type='checkbox';cb.value=k;cb.style.accentColor='#9B8FD4';
+    cb.addEventListener('change',()=>{
+      if(cb.checked)selectedKams.add(k);else selectedKams.delete(k);
+      updateKamBtnLabel();applyFilters();
+    });
+    item.appendChild(cb);item.appendChild(document.createTextNode(k));
+    list.appendChild(item);
+  });
+  const ft=document.getElementById('f-tipo');
+  tipos.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;ft.appendChild(o);});
+}
+
+function updateKamBtnLabel(){
+  const lbl=document.getElementById('kam-btn-label');
+  if(selectedKams.size===0) lbl.textContent='Todos';
+  else if(selectedKams.size===1) lbl.textContent=[...selectedKams][0].split(' ')[0];
+  else lbl.textContent=`${selectedKams.size} seleccionados`;
+}
+
+function toggleKamDropdown(e){
+  e.stopPropagation();
+  const list=document.getElementById('kam-list');
+  list.style.display=list.style.display==='none'?'block':'none';
+}
+
+document.addEventListener('click',()=>{
+  const list=document.getElementById('kam-list');
+  if(list) list.style.display='none';
+});
+
+function applyFilters(){
+  const week=document.getElementById('f-week').value;
+  const tipo=document.getElementById('f-tipo').value;
+  const search=document.getElementById('search-input').value.toLowerCase();
+  filtered=RAW.filter(r=>{
+    if(week && r.week!=week) return false;
+    if(selectedKams.size>0 && !selectedKams.has(r.kam)) return false;
+    if(tipo && r.tipo!==tipo) return false;
+    if(search && !r.cliente.toLowerCase().includes(search) && !r.kam.toLowerCase().includes(search) && !r.resumen.toLowerCase().includes(search)) return false;
+    return true;
+  });
+  currentPage=1;
+  document.getElementById('filter-count').textContent=`${filtered.length} reuniones`;
+  renderAll();
+}
+
+function resetFilters(){
+  document.getElementById('f-week').value='';
+  selectedKams.clear();
+  document.querySelectorAll('#kam-list input[type=checkbox]').forEach(cb=>cb.checked=false);
+  updateKamBtnLabel();
+  document.getElementById('f-tipo').value='';
+  document.getElementById('search-input').value='';
+  applyFilters();
+}
+
+function renderAll(){
+  renderKPIs();
+  renderExec();
+  renderCharts();
+  renderInsights();
+  renderTable();
+}
+
+function renderKPIs(){
+  const total=filtered.length;
+  const clientes=new Set(filtered.map(r=>r.cliente).filter(Boolean)).size;
+  const days=[...new Set(filtered.map(r=>r.fecha))].length;
+  const rpm=days>0?(total/days).toFixed(1):0;
+  const highSuccess=filtered.filter(r=>r.prediccion_exito>=4).length;
+  const exitRate=total>0?Math.round(highSuccess/total*100):0;
+  const kams=new Set(filtered.map(r=>r.kam).filter(Boolean)).size;
+  document.getElementById('kpi-total').textContent=total;
+  document.getElementById('kpi-rpm').textContent=rpm;
+  document.getElementById('kpi-exit').textContent=exitRate+'%';
+  document.getElementById('kpi-kams').textContent=kams;
+  const dates=filtered.map(r=>r.fecha).sort();
+  document.getElementById('header-date-range').innerHTML=dates.length?`${dates[0]} al ${dates[dates.length-1]}<br><span style="font-size:10px;opacity:0.6">${total} reuniones registradas</span>`:'Sin datos';
+}
+
+function renderExec(){
+  const total=filtered.length;
+  if(!total){document.getElementById('exec-body').textContent='No hay reuniones para el período seleccionado.';document.getElementById('exec-tags').innerHTML='';return;}
+  const kamCounts={};filtered.forEach(r=>{kamCounts[r.kam]=(kamCounts[r.kam]||0)+1;});
+  const topKam=Object.entries(kamCounts).sort((a,b)=>b[1]-a[1])[0];
+  const clienteCounts={};filtered.forEach(r=>{if(r.cliente){clienteCounts[r.cliente]=(clienteCounts[r.cliente]||0)+1;}});
+  const topCliente=Object.entries(clienteCounts).sort((a,b)=>b[1]-a[1])[0];
+  const tipoCounts={};filtered.forEach(r=>{tipoCounts[r.tipo]=(tipoCounts[r.tipo]||0)+1;});
+  const topTipo=Object.entries(tipoCounts).sort((a,b)=>b[1]-a[1])[0];
+  const ventaCount=filtered.filter(r=>r.tipo==='Venta Rewards').length;
+  const seguimientoCount=filtered.filter(r=>r.tipo==='Seguimiento clientes actuales').length;
+  const highSuccess=filtered.filter(r=>r.prediccion_exito>=4).length;
+  const exitPct=Math.round(highSuccess/total*100);
+  const dates=filtered.map(r=>r.fecha).sort();
+  const periodoStr=dates.length?`entre el ${dates[0]} y el ${dates[dates.length-1]}`:'en el período';
+  const kams=new Set(filtered.map(r=>r.kam).filter(Boolean)).size;
+  document.getElementById('exec-body').innerHTML=`
+    El equipo comercial registró <strong>${total} reuniones</strong> ${periodoStr}, con la participación de <strong>${kams} ejecutivos</strong>. 
+    ${topKam?`<strong>${topKam[0]}</strong> lideró la actividad con ${topKam[1]} reuniones.`:''} 
+    El tipo de reunión más frecuente fue <strong>${topTipo?topTipo[0]:'N/A'}</strong> (${topTipo?topTipo[1]:0} reuniones), con un foco significativo en nuevas ventas (${ventaCount}) y seguimiento a cuentas activas (${seguimientoCount}). 
+    La predicción de éxito es positiva: <strong>${exitPct}%</strong> de las reuniones tienen alta probabilidad de cierre o avance. 
+    ${topCliente?`El cliente con mayor interacción fue <strong>${topCliente[0]}</strong>.`:''}
+  `;
+  const riesgos=detectRisks().length;
+  const opps=detectOpps().length;
+  document.getElementById('exec-tags').innerHTML=`
+    <span class="tag tag-teal">✅ ${exitPct}% tasa de éxito</span>
+    <span class="tag tag-amber">🚀 ${opps} oportunidades detectadas</span>
+    <span class="tag tag-red">⚠️ ${riesgos} alertas de riesgo</span>
+  `;
+}
+
+function renderCharts(){
+  renderSemanasChart();
+  renderTipoChart();
+  renderKamChart();
+  renderCliChart();
+}
+
+function renderSemanasChart(){
+  const weeks=[23,24,25];
+  const counts=weeks.map(w=>filtered.filter(r=>r.week===w).length);
+  const labels=weeks.map(w=>WEEK_LABELS[w]||`Sem ${w}`);
+  const ctx=document.getElementById('chart-semana');
+  if(chartSemana)chartSemana.destroy();
+  chartSemana=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Reuniones',data:counts,backgroundColor:'#FF2D55',borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.parsed.y} reuniones`}}},scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{stepSize:5,font:{size:11}},beginAtZero:true}}}});
+}
+
+function renderTipoChart(){
+  const counts={};filtered.forEach(r=>{counts[r.tipo]=(counts[r.tipo]||0)+1;});
+  const labels=Object.keys(counts);
+  const data=Object.values(counts);
+  const colors=['#FF2D55','#9B8FD4','#F4A325','#c4173a','#c9c0e8'];
+  const ctx=document.getElementById('chart-tipo');
+  if(chartTipo)chartTipo.destroy();
+  chartTipo=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.parsed} (${Math.round(ctx.parsed/data.reduce((a,b)=>a+b,0)*100)}%)`}}},cutout:'60%'}});
+  const legend=document.getElementById('legend-tipo');
+  legend.innerHTML=labels.map((l,i)=>`<span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--ap-text-sec)"><span style="width:10px;height:10px;border-radius:2px;background:${colors[i]};flex-shrink:0"></span>${l}: <b style="color:var(--ap-text)">${data[i]}</b></span>`).join('');
+}
+
+function renderKamChart(){
+  const counts={};filtered.forEach(r=>{if(r.kam)counts[r.kam]=(counts[r.kam]||0)+1;});
+  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const labels=sorted.map(s=>s[0]);
+  const data=sorted.map(s=>s[1]);
+  const h=Math.max(280,labels.length*40+80);
+  document.getElementById('chart-kam-wrap').style.height=h+'px';
+  const ctx=document.getElementById('chart-kam');
+  if(chartKam)chartKam.destroy();
+  chartKam=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Reuniones',data,backgroundColor:'#FF2D55',borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.parsed.x} reuniones`}}},scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:11}},beginAtZero:true},y:{grid:{display:false},ticks:{font:{size:11}}}}}});
+}
+
+function renderCliChart(){
+  const counts={};filtered.forEach(r=>{if(r.cliente&&r.cliente.trim())counts[r.cliente]=(counts[r.cliente]||0)+1;});
+  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const labels=sorted.map(s=>s[0].length>20?s[0].slice(0,18)+'…':s[0]);
+  const data=sorted.map(s=>s[1]);
+  const h=Math.max(280,labels.length*30+80);
+  document.getElementById('chart-cli-wrap').style.height=h+'px';
+  const ctx=document.getElementById('chart-cli');
+  if(chartCli)chartCli.destroy();
+  chartCli=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Reuniones',data,backgroundColor:'#9B8FD4',borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.parsed.x} reuniones`}}},scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:11}},beginAtZero:true,ticks:{stepSize:1}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+}
+
+function detectRisks(){
+  const risks=[];
+  filtered.forEach(r=>{
+    const text=(r.dolores+' '+r.objeciones+' '+r.resumen).toLowerCase();
+    const signals=[];
+    if(text.includes('error') && text.includes('plataforma')) signals.push('Error técnico en plataforma');
+    if(text.includes('factura') && (text.includes('pendiente')||text.includes('problema')||text.includes('desorden'))) signals.push('Problema de facturación');
+    if(text.includes('retraso')||text.includes('demora')) signals.push('Retraso operativo');
+    if(text.includes('reclamo')||text.includes('queja')||text.includes('molestia')||text.includes('frustración')) signals.push('Reclamo / insatisfacción');
+    if(text.includes('churn')||text.includes('pérdida del cliente')||text.includes('discontinu')) signals.push('Riesgo de pérdida');
+    if(text.includes('cédula no válida')||text.includes('no logr')||text.includes('no puede')) signals.push('Falla operativa bloqueante');
+    if(text.includes('contraseña')&&text.includes('error')) signals.push('Problema de acceso');
+    if(signals.length>0) risks.push({nombre:r.cliente||r.nombre_reunion.slice(0,40),kam:r.kam,fecha:r.fecha,signals});
+  });
+  return risks.slice(0,8);
+}
+
+function detectOpps(){
+  const opps=[];
+  filtered.forEach(r=>{
+    const text=(r.dolores+' '+r.resumen+' '+r.acuerdos).toLowerCase();
+    const signals=[];
+    if(text.includes('expansión')||text.includes('ampliar')||text.includes('nuevas razones')) signals.push('Expansión de cuenta');
+    if(text.includes('nuevo proyecto')||text.includes('nueva solución')||text.includes('nueva herramienta')) signals.push('Nuevo proyecto');
+    if(text.includes('alianza')||text.includes('partner')||text.includes('white label')) signals.push('Alianza comercial');
+    if(text.includes('piloto')||text.includes('prueba')||text.includes('poc')) signals.push('Piloto/POC');
+    if((text.includes('nuevo cliente')||text.includes('nuevos usuarios'))) signals.push('Nuevos usuarios');
+    if(text.includes('sindicato')||text.includes('otra área')||text.includes('otro departamento')) signals.push('Cross-sell interno');
+    if(signals.length>0) opps.push({nombre:r.cliente||r.nombre_reunion.slice(0,40),kam:r.kam,signals});
+  });
+  return opps.slice(0,8);
+}
+
+function renderInsights(){
+  // Topics
+  const topicDefs={
+    'Plataforma / panel':['plataforma','panel','acceso','usuario','dashboard'],
+    'Canjes / Gift Cards':['canje','canjear','gift card','redención','redimir','puntos'],
+    'Facturación / contrato':['factura','contrato','facturación','pago','cobro'],
+    'Implementación / onboarding':['implementa','alta','activación','onboarding','capacitación'],
+    'Campañas / incentivos':['campaña','incentivo','beneficio','promoción','programa'],
+    'Soporte técnico':['soporte','error','falla','técnico','contraseña','acceso'],
+    'Integraciones / API':['integración','api','conector','shopify','erp'],
+    'Oportunidades nuevas':['alianza','nuevo proyecto','expansión','piloto','poc','nueva solución'],
+  };
+  const topicCounts={};
+  Object.keys(topicDefs).forEach(t=>topicCounts[t]=0);
+  filtered.forEach(r=>{
+    const text=(r.resumen+' '+r.dolores+' '+r.acuerdos).toLowerCase();
+    Object.entries(topicDefs).forEach(([topic,words])=>{if(words.some(w=>text.includes(w)))topicCounts[topic]++;});
+  });
+  const maxTopic=Math.max(...Object.values(topicCounts),1);
+  const topicsSorted=Object.entries(topicCounts).sort((a,b)=>b[1]-a[1]).filter(t=>t[1]>0);
+  document.getElementById('topics-list').innerHTML=topicsSorted.map(([t,c])=>`
+    <div class="bar-row">
+      <div class="bar-label" title="${t}">${t}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(c/maxTopic*100)}%;background:#9B8FD4"></div></div>
+      <div class="bar-count">${c}</div>
+    </div>`).join('');
+
+  // Requests
+  const requestDefs={
+    'Facilidad de acceso y onboarding':['cómo ingresar','cómo acceder','contraseña','alta de cuenta','registro'],
+    'Flexibilidad en catálogo de canje':['catálogo','flexibilidad','más opciones','productos físicos','gift card variada'],
+    'Claridad fiscal y tributaria':['tributar','deducible','factura','impuesto','contabilidad'],
+    'Integración con sistemas internos':['api','integración','erp','nómina','shopify'],
+    'Incentivos en efectivo':['efectivo','cash','dinero','monetizar'],
+    'Soporte más rápido':['soporte','respuesta rápida','tiempo de respuesta'],
+    'Branding / White Label':['white label','marca propia','branding','personalización de marca'],
+    'Línea de crédito':['línea de crédito','crédito','pago a 45','pago diferido'],
+  };
+  const reqCounts={};Object.keys(requestDefs).forEach(t=>reqCounts[t]=0);
+  filtered.forEach(r=>{
+    const text=(r.dolores+' '+r.objeciones+' '+r.resumen).toLowerCase();
+    Object.entries(requestDefs).forEach(([req,words])=>{if(words.some(w=>text.includes(w)))reqCounts[req]++;});
+  });
+  const maxReq=Math.max(...Object.values(reqCounts),1);
+  const reqSorted=Object.entries(reqCounts).sort((a,b)=>b[1]-a[1]).filter(r=>r[1]>0);
+  document.getElementById('requests-list').innerHTML=reqSorted.map(([r,c])=>`
+    <div class="bar-row">
+      <div class="bar-label" title="${r}">${r}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(c/maxReq*100)}%;background:#FF2D55"></div></div>
+      <div class="bar-count">${c}</div>
+    </div>`).join('');
+
+  // Opps
+  const opps=detectOpps();
+  document.getElementById('opps-list').innerHTML=opps.length?opps.map(o=>`
+    <div class="opp-item">
+      <div>
+        <div class="opp-name">${o.nombre}</div>
+        <div class="opp-meta">${o.kam}</div>
+      </div>
+      <span class="opp-badge">${o.signals[0]}</span>
+    </div>`).join(''):`<div class="empty-state">No se detectaron oportunidades en el período</div>`;
+
+  // Risks
+  const risks=detectRisks();
+  document.getElementById('risks-list').innerHTML=risks.length?risks.map(r=>`
+    <div class="risk-item">
+      <div class="risk-dot risk-dot-amber"></div>
+      <div>
+        <div class="risk-name">${r.nombre}</div>
+        <div class="risk-detail">${r.kam} · ${r.fecha} · ${r.signals[0]}</div>
+      </div>
+    </div>`).join(''):`<div class="empty-state">No se detectaron riesgos críticos</div>`;
+}
+
+function renderTable(){
+  const start=(currentPage-1)*ROWS_PER_PAGE;
+  const page=filtered.slice(start,start+ROWS_PER_PAGE);
+  const tbody=document.getElementById('table-body');
+  if(!page.length){tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state">No hay reuniones que coincidan con los filtros seleccionados</div></td></tr>`;document.getElementById('page-info').textContent='';document.getElementById('pagination').innerHTML='';return;}
+  tbody.innerHTML=page.map(r=>`
+    <tr>
+      <td>${r.fecha}</td>
+      <td style="font-weight:500">${r.kam}</td>
+      <td>${r.cliente||'—'}</td>
+      <td>${tipoPill(r.tipo)}</td>
+      <td style="max-width:280px;color:var(--ap-text-sec)">${r.resumen.slice(0,150)}${r.resumen.length>150?'…':''}</td>
+      <td style="color:var(--ap-text-sec)">${r.acuerdos?r.acuerdos.slice(0,120)+(r.acuerdos.length>120?'…':''):'—'}</td>
+      <td>${exitoDot(r.prediccion_exito)}</td>
+    </tr>`).join('');
+  const total=filtered.length;
+  const pages=Math.ceil(total/ROWS_PER_PAGE);
+  document.getElementById('page-info').textContent=`Mostrando ${start+1}–${Math.min(start+ROWS_PER_PAGE,total)} de ${total}`;
+  const pag=document.getElementById('pagination');
+  pag.innerHTML='';
+  if(pages>1){
+    const mkBtn=(label,page,isActive)=>{const b=document.createElement('button');b.className='page-btn'+(isActive?' active':'');b.textContent=label;b.onclick=()=>{currentPage=page;renderTable();};return b;};
+    if(currentPage>1)pag.appendChild(mkBtn('←',currentPage-1,false));
+    for(let i=1;i<=pages;i++){if(i===1||i===pages||Math.abs(i-currentPage)<=1)pag.appendChild(mkBtn(i,i,i===currentPage));else if(Math.abs(i-currentPage)===2){const sp=document.createElement('span');sp.textContent='…';sp.style.cssText='font-size:12px;color:var(--ap-text-sec);padding:0 4px';pag.appendChild(sp);}}
+    if(currentPage<pages)pag.appendChild(mkBtn('→',currentPage+1,false));
+  }
+}
+
+// INIT
+document.getElementById('f-week').addEventListener('change',applyFilters);
+document.getElementById('f-tipo').addEventListener('change',applyFilters);
+populateFilters();
+applyFilters();
+</script>
+</body>
+</html>
