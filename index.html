@@ -492,7 +492,7 @@ function detectRisks(){
       if(!nombre||nombre.trim()===''){
         nombre=r.nombre_reunion.replace(/^(NC\s*[\|\-]\s*|NC\s+|Reunión Apprecio\s*[\|\s]*)/i,'').split('|')[0].trim();
       }
-      risks.push({nombre:nombre||r.nombre_reunion.slice(0,40),kam:r.kam,fecha:r.fecha,signals});
+      risks.push({nombre:nombre||r.nombre_reunion.slice(0,40),email:r.email_cliente||'',kam:r.kam,fecha:r.fecha,signals});
     }
   });
   return risks.slice(0,8);
@@ -590,7 +590,7 @@ function renderInsights(){
     <div class="risk-item">
       <div class="risk-dot risk-dot-amber"></div>
       <div>
-        <div class="risk-name">${r.nombre}</div>
+        <div class="risk-name">${r.nombre}${r.email?` · <a href="mailto:${r.email}" style="color:#9B8FD4;font-weight:400;text-decoration:none">${r.email}</a>`:''}</div>
         <div class="risk-detail">${r.kam} · ${r.fecha} · ${r.signals[0]}</div>
       </div>
     </div>`).join(''):`<div class="empty-state">No se detectaron riesgos críticos</div>`;
